@@ -1,0 +1,23 @@
+{
+  "slug": "Wavelet",
+  "name": "Wavelet",
+  "version": "1.0.0",
+  "license": "proprietary",
+  "brand": "Wavelet",
+  "author": "",
+  "authorEmail": "",
+  "authorUrl": "",
+  "pluginUrl": "",
+  "manualUrl": "",
+  "sourceUrl": "",
+  "donateUrl": "",
+  "changelogUrl": "",
+  "modules": [
+    {
+      "slug": "Wavelet",
+      "name": "Wavelet",
+      "description": "",
+      "tags": []
+    }
+  ]
+}
