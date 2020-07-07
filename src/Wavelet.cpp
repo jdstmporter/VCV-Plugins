@@ -1,5 +1,7 @@
 #include "plugin.hpp"
 #include "Haar.hpp"
+#include "Log.hpp"
+#include <iostream>
 
 struct Wavelet : Module {
 	enum ParamIds {
@@ -35,16 +37,22 @@ struct Wavelet : Module {
 		configParam(LEVEL3_PARAM, 0.f, 1.f, 0.f, "detail3");
 		configParam(LEVEL4_PARAM, 0.f, 1.f, 0.f, "detail4");
 		configParam(APPROX_PARAM, 0.f, 1.f, 0.f, "approximation");
+		log() << "Configured parameters for Wavelet" << std::endl;
 
 		for(auto i=0;i<16;i++) outs[i]=0;
+
+		log() << "Configured arrays for Wavelet" << std::endl;
 	}
 
 	void process(const ProcessArgs& args) override {
 
 			for(auto i=0;i<5;i++) thresholds[i]=params[i].getValue();
+			auto t=clamp(thresholds[0]+thresholds[4],-10.0f,10.0f)/10.0f;
 			float input = inputs[IN_INPUT].getVoltage();
 			input = clamp(input,-5.0f,5.0f);
 
+
+			log() << "Processing " << offset << " at " << args.sampleTime << std::endl;
 			buffer[offset++]=input;
 			if(offset==16) {
 				wavelet.process(buffer,outs,thresholds);
@@ -52,6 +60,7 @@ struct Wavelet : Module {
 			}
 			float output = clamp(outs[offset],-5.0f,5.0f);
 			outputs[OUT_OUTPUT].setVoltage(output);
+
 	}
 };
 

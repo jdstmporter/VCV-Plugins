@@ -6,77 +6,108 @@
  */
 
 #include "Haar.hpp"
+#include <iostream>
+#include <algorithm>
+#include <numeric>
+#include "Log.hpp"
 
 namespace haar {
 
-Haar::Haar(const unsigned N_) : N(N_), block(1<<N), row(block,0), tmp(block,0), details(block,0) {
+Haar::Haar(const unsigned N_) : N(N_), block(1<<N) {
+	row = new float[block];
+	tmp = new float[block];
+	details = new float[block*(N+1)];
+
+	reset();
+	log() << "Initialised Haar wavelet class" << std::endl;
+}
+
+Haar::~Haar() {
+	delete[] details;
+	delete[] tmp;
+	delete[] row;
 }
 
 unsigned Haar::length(const unsigned n) {
 	if(n<N) { return 1<<(N-1-n); }
 	else { return 1; }
 }
-Haar::iterator Haar::begin(const unsigned n) {
-	if(n<N) { return details.begin()+block-(1<<(N-n)); }
-	else { return details.begin()+block-1; }
-}
-Haar::iterator Haar::end(const unsigned n) {
-	if(n<N) { return begin(n)+length(n); }
-	else { return details.end(); }
-}
+float * Haar::begin(const unsigned n) { return details+block*n; }
+
 
 void Haar::reset() {
-	details.assign(block,0);
-    row.assign(block,0);
-    tmp.assign(block,0);
+	std::fill_n(tmp,block,0);
+    std::fill_n(row,block,0);
+    std::fill_n(details,block*(N+1),0);
 }
 
 float Haar::sum(const unsigned level) {
-    return std::accumulate(begin(level),end(level), 0, [](float p,float x) { return p+x;} );
+	float sum=0;
+	auto it=begin(level);
+	for(unsigned i=0;i<length(level);i++) sum += it[i];
+    return sum;
 }
 float Haar::sumSq(const unsigned level) {
-    return std::accumulate(begin(level),end(level), 0, [](float p,float x) { return p+x*x;} );
+	float sum=0;
+	auto it=begin(level);
+	for(unsigned i=0;i<length(level);i++) sum += it[i]*it[i];
+	   return sum;
 }
 
 void Haar::analyse(float * input) {
-    std::copy_n(input,block,row.begin());
+	log() << "copying input" << std::endl;
+    std::copy_n(input,block,row);
     for(unsigned level=0;level<N;level++) {
-    	unsigned i=0;
-        for(auto it=begin(level); it!=end(level); i++,it++) {
-            *it = 0.5*(row[2*i]-row[2*i+1]);
+    	log() << "Level " << level << std::endl;
+    	auto it=begin(level);
+        for(unsigned i=0; i<length(level); i++) {
+            it[i] = 0.5*(row[2*i]-row[2*i+1]);
             tmp[i] = 0.5*(row[2*i]+row[2*i+1]);
 
         }
-        std::copy_n(tmp.begin(),length(level),row.begin());
+        log() << "Copying tmp" << std::endl;
+        std::copy_n(tmp,length(level),row);
     }
-    std::copy_n(row.begin(),length(N),begin(N));
+    log() << "Copying approximation" << std::endl;
+    begin(N)[0]=row[0];
 }
 
 void Haar::threshold(float *thresholds)  {
     for(unsigned level=0;level<=N;level++) {
-        auto mu=sum(level)/float(length(level));
+    	log() << "Level " << level << std::endl;
+        auto mu=sum(level)/(float)length(level);
         auto th=thresholds[level];
-        std::replace_if(begin(level),end(level),[mu,th](float value) { return abs(value-mu)>th; },0);
+        log() << "Mean is " << mu << " threshold " << th << std::endl;
+        auto it=begin(level);
+        for(unsigned i=0;i<length(level);i++) {
+        	if(abs(it[i]-mu)>=th) it[i]=0;
+        }
     }
 }
 
 void Haar::synthesise(float *out) {
-    std::copy_n(begin(N),length(N),row.begin());
-    for(unsigned level=N-1;level>=0;level--) {
-    	unsigned i=0;
-        for(auto it=begin(level); it!=end(level); i++,it++) {
-            tmp[2*i] = row[i] + *it;
-            tmp[2*i+1] = row[i] - *it;
+	row[0]=begin(N)[0];
+    for(int level=N-1;level>=0;level--) {
+    	log() << "Level " << level << std::endl;
+    	auto it=begin(level);
+        for(unsigned i=0; i<length(level); i++) {
+            tmp[2*i] = row[i] + it[i];
+            tmp[2*i+1] = row[i] - it[i];
         }
-        std::copy_n(tmp.begin(),2*length(level),row.begin());
+        std::copy_n(tmp,2*length(level),row);
     }
-    std::copy_n(row.begin(),block,out);
+    log() << "Copying out " << std::endl;
+    std::copy_n(row,block,out);
 }
 
 void Haar::process(float *input, float *output,float *thresholds) {
+	log() << "Analyse" << std::endl;
     analyse(input);
+    log() << "Threshold" << std::endl;
     threshold(thresholds);
+    log() << "Synthesise" << std::endl;
     synthesise(output);
+    log() << "Done" << std::endl;
 }
 
 

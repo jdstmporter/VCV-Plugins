@@ -20,26 +20,24 @@ namespace haar {
 
 class Haar {
 private:
-    using vec_t = std::vector<float>;
-    using iterator = std::vector<float>::iterator;
     
     unsigned N;
     unsigned block;
-    vec_t row;
-    vec_t tmp;
-    vec_t details; 
+    float *row;
+    float *tmp;
+    float *details; 
     
     
     
     unsigned length(const unsigned n);
-    iterator begin(const unsigned n);
-    iterator end(const unsigned n);
+    float * begin(const unsigned n);
+
     
     
 public:
     Haar(const unsigned N_);
     Haar(const Haar &) = default;
-    virtual ~Haar() =default;
+    virtual ~Haar();
     
     float sum(const unsigned level);
     float sumSq(const unsigned level);

@@ -1,11 +1,11 @@
 {
   "slug": "Wavelet",
   "name": "Wavelet",
-  "version": "1.0.0",
-  "license": "proprietary",
-  "brand": "Wavelet",
-  "author": "",
-  "authorEmail": "",
+  "version": "1.0.1",
+  "license": "BSD-3-Clause",
+  "brand": "",
+  "author": "Julian Porter",
+  "authorEmail": "julian@porternet.org",
   "authorUrl": "",
   "pluginUrl": "",
   "manualUrl": "",
@@ -16,8 +16,8 @@
     {
       "slug": "Wavelet",
       "name": "Wavelet",
-      "description": "",
-      "tags": []
+      "description": "Wavelet transform distortion",
+      "tags": [ "Distortion" ]
     }
   ]
 }
