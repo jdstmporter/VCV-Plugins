@@ -30,6 +30,9 @@ struct Wavelet : Module {
 	haar::Haar wavelet;
 	unsigned offset=0;
 
+	float vars[5];
+
+
 	Wavelet() : wavelet(4) {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 		configParam(LEVEL1_PARAM, 0.f, 1.f, 0.f, "detail1");
@@ -40,14 +43,19 @@ struct Wavelet : Module {
 		log() << "Configured parameters for Wavelet" << std::endl;
 
 		for(auto i=0;i<16;i++) outs[i]=0;
+		for(auto l=0;l<5;l++) vars[l]=0;
+
 
 		log() << "Configured arrays for Wavelet" << std::endl;
 	}
 
 	void process(const ProcessArgs& args) override {
 
-			for(auto i=0;i<5;i++) thresholds[i]=params[i].getValue();
-			auto t=clamp(thresholds[0]+thresholds[4],-10.0f,10.0f)/10.0f;
+			for(auto i=0;i<5;i++) {
+				auto v = params[i].getValue();
+				thresholds[i]=clamp(v,0.0f,10.0f);
+			}
+
 			float input = inputs[IN_INPUT].getVoltage();
 			input = clamp(input,-5.0f,5.0f);
 
@@ -55,7 +63,16 @@ struct Wavelet : Module {
 			log() << "Processing " << offset << " at " << args.sampleTime << std::endl;
 			buffer[offset++]=input;
 			if(offset==16) {
-				wavelet.process(buffer,outs,thresholds);
+				wavelet.analyse(buffer);
+
+				for(auto level=0;level<5;level++) {
+					auto var =0.2*vars[level] + 0.8*wavelet.var(level);
+					if(var>0) thresholds[level]/=sqrt(var);
+					vars[level]=var;
+				}
+				wavelet.threshold(thresholds);
+				wavelet.synthesise(outs);
+
 				offset=0;
 			}
 			float output = clamp(outs[offset],-5.0f,5.0f);

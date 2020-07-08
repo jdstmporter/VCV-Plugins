@@ -40,7 +40,7 @@ public:
     virtual ~Haar();
     
     float sum(const unsigned level);
-    float sumSq(const unsigned level);
+    float var(const unsigned level);
     
     unsigned size() const { return block; }
     void reset();

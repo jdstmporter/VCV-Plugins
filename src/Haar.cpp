@@ -45,13 +45,14 @@ float Haar::sum(const unsigned level) {
 	float sum=0;
 	auto it=begin(level);
 	for(unsigned i=0;i<length(level);i++) sum += it[i];
-    return sum;
+    return sum/(float)length(level);
 }
-float Haar::sumSq(const unsigned level) {
+float Haar::var(const unsigned level) {
+	float mean = sum(level);
 	float sum=0;
 	auto it=begin(level);
-	for(unsigned i=0;i<length(level);i++) sum += it[i]*it[i];
-	   return sum;
+	for(unsigned i=0;i<length(level);i++) sum += (it[i]-mean)*(it[i]-mean);
+	   return sum/(float)length(level);
 }
 
 void Haar::analyse(float * input) {
@@ -75,7 +76,7 @@ void Haar::analyse(float * input) {
 void Haar::threshold(float *thresholds)  {
     for(unsigned level=0;level<=N;level++) {
     	log() << "Level " << level << std::endl;
-        auto mu=sum(level)/(float)length(level);
+        auto mu=sum(level);
         auto th=thresholds[level];
         log() << "Mean is " << mu << " threshold " << th << std::endl;
         auto it=begin(level);
