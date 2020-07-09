@@ -31,12 +31,10 @@ struct Wavelet : Module {
 	haar::Threshold thresholds;
 	unsigned offset=0;
 
-	unsigned statsOffset=0;
-	std::vector<haar::Block> mu;
-	std::vector<haar::Block> sigma;
 
 
-	Wavelet() : wavelet(4), thresholds(4) {
+
+	Wavelet() : wavelet(4) {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 		configParam(LEVEL1_PARAM, 0.f, 1.f, 0.f, "detail1");
 		configParam(LEVEL2_PARAM, 0.f, 1.f, 0.f, "detail2");
@@ -46,10 +44,7 @@ struct Wavelet : Module {
 		log() << "Configured parameters for Wavelet" << std::endl;
 
 		for(auto i=0;i<16;i++) outs[i]=0;
-		for(auto l=0;l<32;l++) {
-			mu.push_back(haar::Block(4));
-			sigma.push_back(haar::Block(4));
-		}
+
 
 
 		log() << "Configured arrays for Wavelet" << std::endl;
@@ -69,17 +64,7 @@ struct Wavelet : Module {
 			buffer[offset++]=input;
 			if(offset==16) {
 				wavelet.analyse(buffer);
-
-				//for(auto level=0;level<5;level++) {
-					mu[statsOffset] = wavelet.sum();
-					sigma[statsOffset]=wavelet.var();
-					statsOffset=(statsOffset+1)%32;
-
-					auto m = std::accumulate(mu.begin(),mu.end(),haar::Block(4))/32.0;
-					auto v = std::accumulate(sigma.begin(),sigma.end(),haar::Block(4))/32.0;
-					wavelet.threshold(m,thresholds*v);
-				//}
-				//wavelet.threshold(thresholds);
+				wavelet.threshold(thresholds);
 				wavelet.synthesise(outs);
 
 				offset=0;

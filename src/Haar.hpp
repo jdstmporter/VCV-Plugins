@@ -31,8 +31,8 @@ private:
     
     
     
-    unsigned length(const unsigned n);
-    float * begin(const unsigned n);
+    unsigned length(const unsigned n) const;
+    float * begin(const unsigned n) const;
 
     
     
@@ -41,8 +41,9 @@ public:
     Haar(const Haar &) = default;
     virtual ~Haar();
     
-    Block sum();
-    Block var();
+    float sum(const unsigned level) const;
+    float absMax(const unsigned level) const;
+    float var(const unsigned level) const;
     
     unsigned size() const { return block; }
     void reset();

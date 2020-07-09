@@ -33,11 +33,11 @@ Haar::~Haar() {
 	delete[] row;
 }
 
-unsigned Haar::length(const unsigned n) {
+unsigned Haar::length(const unsigned n) const {
 	if(n<N) { return 1<<(N-1-n); }
 	else { return 1; }
 }
-float * Haar::begin(const unsigned n) { return details+block*n; }
+float * Haar::begin(const unsigned n) const { return details+block*n; }
 
 
 void Haar::reset() {
@@ -46,27 +46,23 @@ void Haar::reset() {
     std::fill_n(details,block*(N+1),0);
 }
 
-Block Haar::sum() {
-	Block b(N);
-	for(unsigned level=0;level<=N;level++) {
-		float sum=0;
-		auto it=begin(level);
-		for(unsigned i=0;i<length(level);i++) sum += it[i];
-		b.set(level,sum/(float)length(level));
-	}
-	return b;
+float Haar::sum(const unsigned level) const {
+	float sum=0;
+	auto it=begin(level);
+	for(unsigned i=0;i<length(level);i++) sum += it[i];
+    return sum/(float)length(level);
 }
-Block Haar::var() {
-	auto means=sum();
-	Block b(N);
-	for(unsigned level=0;level<=N;level++) {
-		auto mean=means[level];
-		float sum=0;
-		auto it=begin(level);
-		for(unsigned i=0;i<length(level);i++) sum += (it[i]-mean)*(it[i]-mean);
-	    b.set(level,sqrt(sum/(float)length(level)));
-	}
-	return b;
+float Haar::absMax(const unsigned level) const {
+	auto it=begin(level);
+	auto pair = std::minmax_element(it,it+length(level));
+	return std::max(abs(*pair.first),*(pair.second));
+}
+float Haar::var(const unsigned level) const {
+	float mean = sum(level);
+	float sum=0;
+	auto it=begin(level);
+	for(unsigned i=0;i<length(level);i++) sum += (it[i]-mean)*(it[i]-mean);
+	   return sum/(float)length(level);
 }
 
 void Haar::analyse(float * input) {
@@ -91,12 +87,12 @@ void Haar::threshold(float *thresholds)  {
 	auto s=sum();
     for(unsigned level=0;level<=N;level++) {
     	log() << "Level " << level << std::endl;
-        auto mu=s[level];
-        auto th=thresholds[level];
-        log() << "Mean is " << mu << " threshold " << th << std::endl;
+        auto ma = std::max(1.0f,absMax(level)*1.1f);
+        auto th=thresholds[level] * ma;
+        log() << "Abs max is " << ma << " raw threshold " << thresholds[level] << " threshold " << th << std::endl;
         auto it=begin(level);
         for(unsigned i=0;i<length(level);i++) {
-        	if(abs(it[i]-mu)>=th) it[i]=0;
+        	if(abs(it[i])>th) it[i]=0;
         }
     }
 }
