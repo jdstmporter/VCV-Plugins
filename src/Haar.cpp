@@ -11,7 +11,12 @@
 #include <numeric>
 #include "Log.hpp"
 
+
 namespace haar {
+
+
+
+
 
 Haar::Haar(const unsigned N_) : N(N_), block(1<<N) {
 	row = new float[block];
@@ -41,18 +46,27 @@ void Haar::reset() {
     std::fill_n(details,block*(N+1),0);
 }
 
-float Haar::sum(const unsigned level) {
-	float sum=0;
-	auto it=begin(level);
-	for(unsigned i=0;i<length(level);i++) sum += it[i];
-    return sum/(float)length(level);
+Block Haar::sum() {
+	Block b(N);
+	for(unsigned level=0;level<=N;level++) {
+		float sum=0;
+		auto it=begin(level);
+		for(unsigned i=0;i<length(level);i++) sum += it[i];
+		b.set(level,sum/(float)length(level));
+	}
+	return b;
 }
-float Haar::var(const unsigned level) {
-	float mean = sum(level);
-	float sum=0;
-	auto it=begin(level);
-	for(unsigned i=0;i<length(level);i++) sum += (it[i]-mean)*(it[i]-mean);
-	   return sum/(float)length(level);
+Block Haar::var() {
+	auto means=sum();
+	Block b(N);
+	for(unsigned level=0;level<=N;level++) {
+		auto mean=means[level];
+		float sum=0;
+		auto it=begin(level);
+		for(unsigned i=0;i<length(level);i++) sum += (it[i]-mean)*(it[i]-mean);
+	    b.set(level,sqrt(sum/(float)length(level)));
+	}
+	return b;
 }
 
 void Haar::analyse(float * input) {
@@ -74,9 +88,10 @@ void Haar::analyse(float * input) {
 }
 
 void Haar::threshold(float *thresholds)  {
+	auto s=sum();
     for(unsigned level=0;level<=N;level++) {
     	log() << "Level " << level << std::endl;
-        auto mu=sum(level);
+        auto mu=s[level];
         auto th=thresholds[level];
         log() << "Mean is " << mu << " threshold " << th << std::endl;
         auto it=begin(level);
@@ -84,6 +99,17 @@ void Haar::threshold(float *thresholds)  {
         	if(abs(it[i]-mu)>=th) it[i]=0;
         }
     }
+}
+
+void Haar::threshold(const Block &mu,const Block &sigma) {
+	for(unsigned level=0;level<=N;level++) {
+		auto it=begin(level);
+		auto m=mu[level];
+		auto t=sigma[level];
+		for(unsigned i=0;i<length(level);i++) {
+			if(abs(it[i]-m)>=t) it[i]=0;
+		}
+	}
 }
 
 void Haar::synthesise(float *out) {

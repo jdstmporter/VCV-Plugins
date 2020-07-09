@@ -3,6 +3,7 @@
 #include "Log.hpp"
 #include <iostream>
 
+
 struct Wavelet : Module {
 	enum ParamIds {
 		LEVEL1_PARAM,
@@ -26,14 +27,16 @@ struct Wavelet : Module {
 
 	float buffer[16];
 	float outs[16];
-	float thresholds[5];
 	haar::Haar wavelet;
+	haar::Threshold thresholds;
 	unsigned offset=0;
 
-	float vars[5];
+	unsigned statsOffset=0;
+	std::vector<haar::Block> mu;
+	std::vector<haar::Block> sigma;
 
 
-	Wavelet() : wavelet(4) {
+	Wavelet() : wavelet(4), thresholds(4) {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 		configParam(LEVEL1_PARAM, 0.f, 1.f, 0.f, "detail1");
 		configParam(LEVEL2_PARAM, 0.f, 1.f, 0.f, "detail2");
@@ -43,7 +46,10 @@ struct Wavelet : Module {
 		log() << "Configured parameters for Wavelet" << std::endl;
 
 		for(auto i=0;i<16;i++) outs[i]=0;
-		for(auto l=0;l<5;l++) vars[l]=0;
+		for(auto l=0;l<32;l++) {
+			mu.push_back(haar::Block(4));
+			sigma.push_back(haar::Block(4));
+		}
 
 
 		log() << "Configured arrays for Wavelet" << std::endl;
@@ -52,8 +58,7 @@ struct Wavelet : Module {
 	void process(const ProcessArgs& args) override {
 
 			for(auto i=0;i<5;i++) {
-				auto v = params[i].getValue();
-				thresholds[i]=clamp(v,0.0f,10.0f);
+				thresholds.set(i,params[i].getValue());
 			}
 
 			float input = inputs[IN_INPUT].getVoltage();
@@ -65,12 +70,16 @@ struct Wavelet : Module {
 			if(offset==16) {
 				wavelet.analyse(buffer);
 
-				for(auto level=0;level<5;level++) {
-					auto var =0.2*vars[level] + 0.8*wavelet.var(level);
-					if(var>0) thresholds[level]/=sqrt(var);
-					vars[level]=var;
-				}
-				wavelet.threshold(thresholds);
+				//for(auto level=0;level<5;level++) {
+					mu[statsOffset] = wavelet.sum();
+					sigma[statsOffset]=wavelet.var();
+					statsOffset=(statsOffset+1)%32;
+
+					auto m = std::accumulate(mu.begin(),mu.end(),haar::Block(4))/32.0;
+					auto v = std::accumulate(sigma.begin(),sigma.end(),haar::Block(4))/32.0;
+					wavelet.threshold(m,thresholds*v);
+				//}
+				//wavelet.threshold(thresholds);
 				wavelet.synthesise(outs);
 
 				offset=0;

@@ -18,6 +18,8 @@
 
 namespace haar {
 
+
+
 class Haar {
 private:
     
@@ -39,14 +41,15 @@ public:
     Haar(const Haar &) = default;
     virtual ~Haar();
     
-    float sum(const unsigned level);
-    float var(const unsigned level);
+    Block sum();
+    Block var();
     
     unsigned size() const { return block; }
     void reset();
     
     void analyse(float * input);
     void threshold(float *thresholds);
+    void threshold(const Block & mu,const Block & theta);
     void synthesise(float *out);
     
     void process(float *input,float *output,float *thresholds);
