@@ -25,35 +25,28 @@ private:
     
     unsigned N;
     unsigned block;
-    float *row;
-    float *tmp;
-    float *details; 
+    float * row;
+    float * tmp;
+    float * details; 
     
     
     
     unsigned length(const unsigned n) const;
-    float * begin(const unsigned n) const;
+    float * begin(const unsigned n);
+    float * end(const unsigned n);
 
-    
-    
 public:
     Haar(const unsigned N_);
     Haar(const Haar &) = default;
     virtual ~Haar();
-    
-    float sum(const unsigned level) const;
-    float absMax(const unsigned level) const;
-    float var(const unsigned level) const;
-    
+
     unsigned size() const { return block; }
     void reset();
     
-    void analyse(float * input);
-    void threshold(float *thresholds);
-    void threshold(const Block & mu,const Block & theta);
+    void analyse(float *);
+    void threshold(float *);
     void synthesise(float *out);
     
-    void process(float *input,float *output,float *thresholds);
  
 };
 

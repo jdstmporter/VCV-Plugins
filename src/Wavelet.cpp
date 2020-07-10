@@ -1,10 +1,15 @@
 #include "plugin.hpp"
 #include "Haar.hpp"
-#include "Log.hpp"
 #include <iostream>
 
+#define NLAYERS 4
+#define BLOCK (1<<NLAYERS)
+
+#define THRESHOLD_MAX 1.0f
 
 struct Wavelet : Module {
+
+
 	enum ParamIds {
 		LEVEL1_PARAM,
 		LEVEL2_PARAM,
@@ -25,53 +30,46 @@ struct Wavelet : Module {
 		NUM_LIGHTS
 	};
 
-	float buffer[16];
-	float outs[16];
 	haar::Haar wavelet;
-	haar::Threshold thresholds;
-	unsigned offset=0;
+	float * buffer;
+	float * outs;
+	float * thresholds;
+	unsigned offset;
 
+	Wavelet() : wavelet(NLAYERS), offset(0) {
+		buffer = new float[BLOCK];
+		outs = new float[BLOCK];
+		thresholds = new float[NLAYERS+1];
 
-
-
-	Wavelet() : wavelet(4) {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-		configParam(LEVEL1_PARAM, 0.f, 1.f, 0.f, "detail1");
-		configParam(LEVEL2_PARAM, 0.f, 1.f, 0.f, "detail2");
-		configParam(LEVEL3_PARAM, 0.f, 1.f, 0.f, "detail3");
-		configParam(LEVEL4_PARAM, 0.f, 1.f, 0.f, "detail4");
-		configParam(APPROX_PARAM, 0.f, 1.f, 0.f, "approximation");
-		log() << "Configured parameters for Wavelet" << std::endl;
-
-		for(auto i=0;i<16;i++) outs[i]=0;
-
-
-
-		log() << "Configured arrays for Wavelet" << std::endl;
+		configParam(LEVEL1_PARAM, 0.f, THRESHOLD_MAX, 0.f, "detail1");
+		configParam(LEVEL2_PARAM, 0.f, THRESHOLD_MAX, 0.f, "detail2");
+		configParam(LEVEL3_PARAM, 0.f, THRESHOLD_MAX, 0.f, "detail3");
+		configParam(LEVEL4_PARAM, 0.f, THRESHOLD_MAX, 0.f, "detail4");
+		configParam(APPROX_PARAM, 0.f, THRESHOLD_MAX, 0.f, "approximation");
+	}
+	virtual ~Wavelet() {
+		delete [] buffer;
+		delete [] outs;
+		delete [] thresholds;
 	}
 
 	void process(const ProcessArgs& args) override {
+			DEBUG("Processing %d at %f",offset,args.sampleTime);
 
-			for(auto i=0;i<5;i++) {
-				thresholds.set(i,params[i].getValue());
-			}
+			for(auto i=0;i<NLAYERS+1;i++) thresholds[i]=params[i].getValue();
 
 			float input = inputs[IN_INPUT].getVoltage();
 			input = clamp(input,-5.0f,5.0f);
-
-
-			log() << "Processing " << offset << " at " << args.sampleTime << std::endl;
 			buffer[offset++]=input;
-			if(offset==16) {
+			if(offset==BLOCK) {
 				wavelet.analyse(buffer);
 				wavelet.threshold(thresholds);
 				wavelet.synthesise(outs);
-
 				offset=0;
 			}
 			float output = clamp(outs[offset],-5.0f,5.0f);
 			outputs[OUT_OUTPUT].setVoltage(output);
-
 	}
 };
 
