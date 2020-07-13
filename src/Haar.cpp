@@ -26,6 +26,7 @@ Haar::Haar(const unsigned N_) : N(N_), block(1<<N) {
 	INFO("Initialised Haar wavelet class");
 }
 Haar::~Haar() {
+	INFO("Deinitialising Haar wavelet class");
 	delete [] row;
 	delete [] tmp;
 	delete [] details;
@@ -51,26 +52,26 @@ void Haar::reset() {
 }
 
 void Haar::analyse(float * input) {
-	DEBUG("Haar wavelet copying input");
+	//DEBUG("Haar wavelet copying input");
     std::copy_n(input,block,row);
     for(unsigned level=0;level<N;level++) {
-    	DEBUG("Haar wavelet at level %d", level);
+    	//DEBUG("Haar wavelet at level %d", level);
     	auto it=begin(level);
         for(unsigned i=0; i<length(level); i++) {
             it[i]  = 0.5*(row[2*i]-row[2*i+1]);
             tmp[i] = 0.5*(row[2*i]+row[2*i+1]);
 
         }
-        DEBUG("Copying tmp");
+        //DEBUG("Copying tmp");
         std::copy_n(tmp,length(level),row);
     }
-    DEBUG("Copying approximation");
+    //DEBUG("Copying approximation");
     *begin(N)=row[0];
 }
 
-void Haar::threshold(float *thresholds)  {
+void Haar::threshold(float *thresholds,float scale)  {
     for(unsigned level=0;level<=N;level++) {
-        auto th=thresholds[level];
+        auto th=thresholds[level]*scale;
         std::replace_if(begin(level),end(level),[th](float x) { return abs(x)>th; },0);
     }
 }
@@ -85,8 +86,13 @@ void Haar::synthesise(float *out) {
         }
         std::copy_n(tmp,2*length(level),row);
     }
-    DEBUG("Copying out wavelet reconstruction");
+    //DEBUG("Copying out wavelet reconstruction");
     std::copy_n(row,block,out);
+}
+
+float Haar::absMaximum() const {
+	auto its = std::minmax_element(details,details+block*(N+1));
+	return std::max(abs(*its.first),abs(*its.second));
 }
 
 

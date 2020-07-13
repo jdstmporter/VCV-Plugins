@@ -4,7 +4,9 @@
 
 #define NLAYERS 4
 #define BLOCK (1<<NLAYERS)
+#define RING 5
 
+#define EPSILON 1.0e-6
 #define THRESHOLD_MAX 1.0f
 
 struct Wavelet : Module {
@@ -34,12 +36,20 @@ struct Wavelet : Module {
 	float * buffer;
 	float * outs;
 	float * thresholds;
-	unsigned offset;
 
-	Wavelet() : wavelet(NLAYERS), offset(0) {
+	float * ring;
+	unsigned offset;
+	unsigned ringOffset;
+
+
+
+	Wavelet() : wavelet(NLAYERS), offset(0), ringOffset(0) {
 		buffer = new float[BLOCK];
 		outs = new float[BLOCK];
 		thresholds = new float[NLAYERS+1];
+		ring = new float[RING];
+
+
 
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 		configParam(LEVEL1_PARAM, 0.f, THRESHOLD_MAX, 0.f, "detail1");
@@ -47,15 +57,17 @@ struct Wavelet : Module {
 		configParam(LEVEL3_PARAM, 0.f, THRESHOLD_MAX, 0.f, "detail3");
 		configParam(LEVEL4_PARAM, 0.f, THRESHOLD_MAX, 0.f, "detail4");
 		configParam(APPROX_PARAM, 0.f, THRESHOLD_MAX, 0.f, "approximation");
+		INFO("Wavelet module wrapper class initialised");
 	}
 	virtual ~Wavelet() {
 		delete [] buffer;
 		delete [] outs;
 		delete [] thresholds;
+		delete [] ring;
 	}
 
 	void process(const ProcessArgs& args) override {
-			DEBUG("Processing %d at %f",offset,args.sampleTime);
+			//DEBUG("Processing %d at %f",offset,args.sampleTime);
 
 			for(auto i=0;i<NLAYERS+1;i++) thresholds[i]=params[i].getValue();
 
@@ -64,7 +76,10 @@ struct Wavelet : Module {
 			buffer[offset++]=input;
 			if(offset==BLOCK) {
 				wavelet.analyse(buffer);
-				wavelet.threshold(thresholds);
+				ring[ringOffset]=wavelet.absMaximum();
+				ringOffset=(ringOffset+1)%RING;
+				auto ringMax = *std::max_element(ring,ring+RING);
+				wavelet.threshold(thresholds,ringMax+EPSILON);
 				wavelet.synthesise(outs);
 				offset=0;
 			}

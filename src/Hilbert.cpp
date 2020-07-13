@@ -1,40 +1,52 @@
-/*
- * Hilbert.cpp
- *
- *  Created on: 10 Jul 2020
- *      Author: julianporter
- */
-
-#include "Hilbert.hpp"
-#include <cmath>
+#include "plugin.hpp"
 
 
-namespace hilbert {
+struct Hilbert : Module {
+	enum ParamIds {
+		NUM_PARAMS
+	};
+	enum InputIds {
+		Input,
+		NUM_INPUTS
+	};
+	enum OutputIds {
+		Real,
+		Imaginary,
+		Modulus,
+		Phase,
+		NUM_OUTPUTS
+	};
+	enum LightIds {
+		NUM_LIGHTS
+	};
 
-Hilbert::Hilbert(const unsigned n,const unsigned block) :
-		nStages(n), nTaps(1+2*n), blockSize(block), firH(blockSize), firD(blockSize) {
-	hilbertKernel=new float[nTaps];
-	delayKernel=new float[nTaps];
-
-	for(unsigned i=0;i<nStages;i++) {
-		float value = (0==(i&1)) ? 0.0 : 2.0/(M_PI * i);
-		hilbertKernel[nStages+i]=value;
-		hilbertKernel[nStages-i]=-value;
+	Hilbert() {
+		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 	}
-	firH.setKernel(hilbertKernel,nTaps);
 
-	for(unsigned i=0;i<nTaps;i++) delayKernel[i] = (i==nStages) ? 1.0 : 0.0;
-	firD.setKernel(delayKernel,nTaps);
-
+	void process(const ProcessArgs& args) override {
+	}
 };
-Hilbert::~Hilbert() {
-	delete [] hilbertKernel;
-	delete [] delayKernel;
-}
 
-void Hilbert::process(float *input,float *outX, float *outY) {
-	firH.processBlock(input,outX);
-	firH.processBlock(input,outY);
-}
 
-} /* namespace hilbert */
+struct HilbertWidget : ModuleWidget {
+	HilbertWidget(Hilbert* module) {
+		setModule(module);
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Hilbert.svg")));
+
+		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
+		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.62, 22.112)), module, Hilbert::Input));
+
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(7.62, 40.821)), module, Hilbert::Real));
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(7.62, 55.751)), module, Hilbert::Imaginary));
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(7.62, 76.729)), module, Hilbert::Modulus));
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(7.62, 92.415)), module, Hilbert::Phase));
+	}
+};
+
+
+Model* modelHilbert = createModel<Hilbert, HilbertWidget>("Hilbert");

@@ -44,9 +44,11 @@ public:
     void reset();
     
     void analyse(float *);
-    void threshold(float *);
+    void threshold(float *,float scale=1.0);
     void synthesise(float *out);
     
+    float absMaximum() const;
+
  
 };
 

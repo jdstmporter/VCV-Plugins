@@ -5,8 +5,8 @@
  *      Author: julianporter
  */
 
-#ifndef SRC_HILBERT_HPP_
-#define SRC_HILBERT_HPP_
+#ifndef SRC_HILBERTXFORM_HPP_
+#define SRC_HILBERTXFORM_HPP_
 
 #include <dsp/fir.hpp>
 
@@ -31,4 +31,4 @@ public:
 
 } /* namespace hilbert */
 
-#endif /* SRC_HILBERT_HPP_ */
+#endif /* SRC_HILBERTXFORM_HPP_ */
