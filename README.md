@@ -1,16 +1,16 @@
-#Meromorph modules
+# Meromorph modules
 
 A collection of simple VCV modules implementing a number of useful mathematical techniques,
 especially those involving complex (holomorphic) signal processing.
 
-##Hilbert
+## Hilbert
 
 Applies the [Hilbert transform][hilbert] to an input signal.  This has the effect of constructing the imaginary parts of a corresponding *complex* signal whose
 real-valued part is the input signal.  In signal terms, it corresponds to introducing a 90 degree phase shift for positive frequencies, and -90 degree for negative frequencies.
 
 This is incredibly useful, as it opens up the possibility of using complex-valued signal processing algorithms that make many operations much simpler (e.g. envelope construction, true frequency shifting) possible.
 
-###This module
+### This module
 
 - Input: the input signal
 - Main Outputs:
@@ -24,15 +24,15 @@ This is incredibly useful, as it opens up the possibility of using complex-value
   - Phase: the unwrapped phase angle of the *complex* signal, corresponding
     to the phase of the input signal
 
-##Wavelet Shaper
+## Wavelet Shaper
 
 This module uses a very basic wavelet transform to distort a signal in unusual and unexpected ways.
 
-###Basic Theory 
+### Basic Theory 
 
 [Wavelet transforms][wavelet] analyse signals into components representing activity at various *scales*, each factor of 2 longer than the previous.   Thus, the *[Haar Wavelet][haar]* (as used in this module) analyses a signal into events that occur from one sample to the next, i.e. over a scale of 2 pixels, then over a scale of 4 pixels, 8 pixels, etc. In audio terms, that can be thought of as breaking the signal down into sharp transients, and then progressively longer changes.  A signal can be reconstructed exactly from its wavelet components.
 
-###Algorithm
+### Algorithm
 
 This module breaks the signal into blocks of 16 samples, and analyses each using the Haar wavelet, so the result is five *layers* of wavelet components:
 
@@ -46,7 +46,7 @@ The user specifies a threshold for each of these five layers: components in each
 
 *(This is not everything that happens: the thresholds are adaptive, using a simple IIR filter to scale their values from the range 0 - 1 to one suitable to cover the range of actual coefficient values; details can be found in the source code by those who care)*
 
-###Module
+### Module
 
 - Controls: thresholds set by pots in the range 0 - 1:
 
