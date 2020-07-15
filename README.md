@@ -3,6 +3,27 @@
 A collection of simple VCV modules implementing a number of useful mathematical techniques,
 especially those involving complex (holomorphic) signal processing.
 
+##Hilbert
+
+Applies the [Hilbert transform][hilbert] to an input signal.  This has the effect of constructing the imaginary parts of a corresponding *complex* signal whose
+real-valued part is the input signal.  In signal terms, it corresponds to introducing a 90 degree phase shift for positive frequencies, and -90 degree for negative frequencies.
+
+This is incredibly useful, as it opens up the possibility of using complex-valued signal processing algorithms that make many operations much simpler (e.g. envelope construction, true frequency shifting) possible.
+
+###This module
+
+- Input: the input signal
+- Main Outputs:
+  - Real: real part of the *complex* signal: this is just the input 
+    signal delayed so as to line it up correctly with the imaginary part
+  - Imaginary: the imaginary part of the *complex* signal: the result of 
+    applying the Hilbert transform to the input
+- Aux / Utility Outputs:
+  - Modulus: the length of the *complex* signal, i.e. the envelope of the
+    input signal
+  - Phase: the unwrapped phase angle of the *complex* signal, corresponding
+    to the phase of the input signal
+
 ##Wavelet Shaper
 
 This module uses a very basic wavelet transform to distort a signal in unusual and unexpected ways.
@@ -40,6 +61,7 @@ This module uses a variation of a rather crude wavelet-based [video compression 
 [wavelet]: https://en.wikipedia.org/wiki/Wavelet_transform
 [haar]: https://en.wikipedia.org/wiki/Haar_wavelet
 [video]: https://en.wikipedia.org/wiki/Wavelet_transform#Wavelet_compression
+[hilbert]: https://en.wikipedia.org/wiki/Hilbert_transform#Discrete_Hilbert_transform
 
 
 

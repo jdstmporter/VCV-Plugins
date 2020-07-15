@@ -1,7 +1,7 @@
 {
   "slug": "Meromorph",
   "name": "Meromorph",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "license": "BSD-3-Clause",
   "brand": "",
   "author": "Julian Porter",
@@ -25,7 +25,9 @@
       "slug": "Hilbert",
       "name": "Hilbert",
       "description": "Hilbert transform module",
-      "tags": []
+      "tags": [
+      	"Envelope generator","Utility","Filter"
+      ]
     }
   ]
 }

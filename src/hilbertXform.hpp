@@ -8,11 +8,12 @@
 #ifndef SRC_HILBERTXFORM_HPP_
 #define SRC_HILBERTXFORM_HPP_
 
+
 #include <dsp/fir.hpp>
 
 namespace hilbert {
 
-class Hilbert {
+class HilbertTransform {
 private:
 	unsigned nStages;
 	unsigned nTaps;
@@ -21,12 +22,15 @@ private:
 	float *delayKernel;
 	rack::dsp::RealTimeConvolver firH;
 	rack::dsp::RealTimeConvolver firD;
+	
+	void makeKernels();
 public:
-	Hilbert(const unsigned n,const unsigned block=64);
-	virtual ~Hilbert();
+	HilbertTransform(const unsigned n,const unsigned block=64);
+	virtual ~HilbertTransform();
 	
 	
-	void process(float *input,float *outX, float *outY);
+	void process(const float *input,float *outX, float *outY);
+	
 };
 
 } /* namespace hilbert */
