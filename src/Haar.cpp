@@ -76,6 +76,14 @@ void Haar::threshold(float *thresholds,float scale)  {
     }
 }
 
+void Haar::scale(float *scales) {
+	for(unsigned level=0;level<=N;level++) {
+		auto scale=scales[level];
+		auto it=begin(level);
+		for(unsigned i=0; i<length(level); i++) {  it[i] *= scale; }
+	}
+}
+
 void Haar::synthesise(float *out) {
 	row[0]=*begin(N);
     for(int level=N-1;level>=0;level--) {

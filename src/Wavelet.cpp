@@ -1,6 +1,5 @@
 #include "plugin.hpp"
 #include "Haar.hpp"
-#include <iostream>
 
 #define NLAYERS 4
 #define BLOCK (1<<NLAYERS)
@@ -10,28 +9,44 @@
 #define THRESHOLD_MAX 1.0f
 
 struct Wavelet : Module {
-
-
+public:
 	enum ParamIds {
-		LEVEL1_PARAM,
-		LEVEL2_PARAM,
-		LEVEL3_PARAM,
-		LEVEL4_PARAM,
+		DETAIL1_PARAM,
+		DETAIL2_PARAM,
+		DETAIL3_PARAM,
+		DETAIL4_PARAM,
 		APPROX_PARAM,
+		ALGORITHM_PARAM,
 		NUM_PARAMS
 	};
 	enum InputIds {
-		IN_INPUT,
+		INPUT_INPUT,
 		NUM_INPUTS
 	};
 	enum OutputIds {
-		OUT_OUTPUT,
+		OUTPUT_OUTPUT,
 		NUM_OUTPUTS
 	};
 	enum LightIds {
 		NUM_LIGHTS
 	};
 
+	enum class Algorithm : unsigned {
+		Scale = 2,
+		Bypass = 1,
+		Threshold = 0
+	};
+
+private:
+	Algorithm algorithm() {
+		auto value = unsigned(params[ALGORITHM_PARAM].getValue());
+		try {
+			return static_cast<Algorithm>(value);
+		}
+		catch(...) {
+			return Algorithm::Bypass;
+		}
+	}
 	haar::Haar wavelet;
 	float * buffer;
 	float * outs;
@@ -40,25 +55,24 @@ struct Wavelet : Module {
 	float * ring;
 	unsigned offset;
 	unsigned ringOffset;
+public:
 
-
-
-	Wavelet() : wavelet(NLAYERS), offset(0), ringOffset(0) {
+	Wavelet()  : wavelet(NLAYERS), offset(0), ringOffset(0) {
 		buffer = new float[BLOCK];
 		outs = new float[BLOCK];
 		thresholds = new float[NLAYERS+1];
 		ring = new float[RING];
 
-
-
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-		configParam(LEVEL1_PARAM, 0.f, THRESHOLD_MAX, 0.f, "detail1");
-		configParam(LEVEL2_PARAM, 0.f, THRESHOLD_MAX, 0.f, "detail2");
-		configParam(LEVEL3_PARAM, 0.f, THRESHOLD_MAX, 0.f, "detail3");
-		configParam(LEVEL4_PARAM, 0.f, THRESHOLD_MAX, 0.f, "detail4");
-		configParam(APPROX_PARAM, 0.f, THRESHOLD_MAX, 0.f, "approximation");
+		configParam(DETAIL1_PARAM, 0.f, 1.f, 0.f, "");
+		configParam(DETAIL2_PARAM, 0.f, 1.f, 0.f, "");
+		configParam(DETAIL3_PARAM, 0.f, 1.f, 0.f, "");
+		configParam(DETAIL4_PARAM, 0.f, 1.f, 0.f, "");
+		configParam(APPROX_PARAM, 0.f, 1.f, 0.f, "");
+		configParam(ALGORITHM_PARAM, 0.f, 2.f, 0.f, "Algorithm", "",0,1,0);
 		INFO("Wavelet module wrapper class initialised");
 	}
+
 	virtual ~Wavelet() {
 		delete [] buffer;
 		delete [] outs;
@@ -67,11 +81,13 @@ struct Wavelet : Module {
 	}
 
 	void process(const ProcessArgs& args) override {
-			//DEBUG("Processing %d at %f",offset,args.sampleTime);
+		float input = inputs[INPUT_INPUT].getVoltage();
+		auto alg=algorithm();
+		//INFO("Algorithm is %d",alg);
 
 			for(auto i=0;i<NLAYERS+1;i++) thresholds[i]=params[i].getValue();
 
-			float input = inputs[IN_INPUT].getVoltage();
+
 			input = clamp(input,-5.0f,5.0f);
 			buffer[offset++]=input;
 			if(offset==BLOCK) {
@@ -79,13 +95,24 @@ struct Wavelet : Module {
 				ring[ringOffset]=wavelet.absMaximum();
 				ringOffset=(ringOffset+1)%RING;
 				auto ringMax = *std::max_element(ring,ring+RING);
+				switch(alg) {
+				case Algorithm::Threshold:
+					wavelet.threshold(thresholds,ringMax+EPSILON);
+					break;
+				case Algorithm::Bypass:
+					break;
+				case Algorithm::Scale:
+					wavelet.scale(thresholds);
+					break;
+				}
 				wavelet.threshold(thresholds,ringMax+EPSILON);
 				wavelet.synthesise(outs);
 				offset=0;
 			}
-			float output = clamp(outs[offset],-5.0f,5.0f);
-			outputs[OUT_OUTPUT].setVoltage(output);
-	}
+			float output = (alg==Algorithm::Bypass) ? input : clamp(outs[offset],-5.0f,5.0f);
+			outputs[OUTPUT_OUTPUT].setVoltage(output);
+		}
+
 };
 
 
@@ -99,15 +126,16 @@ struct WaveletWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(7.704, 32.317)), module, Wavelet::LEVEL1_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(22.776, 32.317)), module, Wavelet::LEVEL2_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(7.704, 48.523)), module, Wavelet::LEVEL3_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(22.776, 48.523)), module, Wavelet::LEVEL4_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(15.24, 78.808)), module, Wavelet::APPROX_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(7.137, 28.726)), module, Wavelet::DETAIL1_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(21.075, 28.726)), module, Wavelet::DETAIL2_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(7.137, 42.711)), module, Wavelet::DETAIL3_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(21.075, 42.711)), module, Wavelet::DETAIL4_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(7.137, 56.696)), module, Wavelet::APPROX_PARAM));
+		addParam(createParam<CKSSThree>(mm2px(Vec(4.764, 72.534)), module, Wavelet::ALGORITHM_PARAM));
 
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(8.52, 104.699)), module, Wavelet::IN_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(8.52, 104.699)), module, Wavelet::INPUT_INPUT));
 
-		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(21.96, 104.699)), module, Wavelet::OUT_OUTPUT));
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(21.96, 104.699)), module, Wavelet::OUTPUT_OUTPUT));
 	}
 };
 
