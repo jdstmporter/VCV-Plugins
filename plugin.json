@@ -26,8 +26,16 @@
       "name": "Hilbert",
       "description": "Hilbert transform module",
       "tags": [
-      	"Envelope generator","Utility","Filter"
+        "Envelope generator",
+        "Utility",
+        "Filter"
       ]
+    },
+    {
+      "slug": "Windy",
+      "name": "Windy",
+      "description": "Wind Machine Instrument",
+      "tags": []
     }
   ]
 }
