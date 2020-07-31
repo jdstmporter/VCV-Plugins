@@ -14,7 +14,7 @@ See LICENSE.txt for this sample’s licensing information
 #include <functional>
 #include <map>
 #include "PointSource.hpp"
-#include "Utility/Randomiser.hpp"
+#include "Randomiser.hpp"
 #include "ParameterSet.hpp"
 
 
@@ -50,7 +50,7 @@ public:
     virtual ~MultiNoiseGenerator() = default;
     
     
-    virtual data_t Render(data_t *inBuffer, uint32_t inNumFrames, ParameterSet &params) override;
+    virtual data_t Render(data_t *inBuffer, uint32_t inNumFrames, ParameterSet &params);
     
     
     

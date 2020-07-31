@@ -1,50 +1,8 @@
 #include "plugin.hpp"
+#include "customWidgets.hpp"
+#include "MultiNoiseGenerator.hpp"
 
-struct FourSwitch : app::SvgSwitch {
-	FourSwitch() {
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/CKSSFour_0.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/CKSSFour_1.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/CKSSFour_2.svg")));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/CKSSFour_3.svg")));
-	}
-};
-
-struct SlidePot : app::SvgSlider {
-	SlidePot() {
-		math::Vec margin = math::Vec(3.5, 3.5);
-		maxHandlePos = math::Vec(-1, -2).plus(margin);
-		minHandlePos = math::Vec(-1, 87).plus(margin);
-		setBackgroundSvg(APP->window->loadSvg(asset::plugin(pluginInstance,"res/SlidePot.svg")));
-		setHandleSvg(APP->window->loadSvg(asset::plugin(pluginInstance,"res/SlidePotHandle.svg")));
-		background->box.pos = margin;
-		box.size = background->box.size.plus(margin.mult(2));
-	}
-};
-
-struct SlidePotH : app::SvgSlider {
-	SlidePotH() {
-		horizontal = true;
-		maxHandlePos = app::mm2px(math::Vec(16.578, 0.738).plus(math::Vec(0, 2)));
-		minHandlePos = app::mm2px(math::Vec(0.738, 0.738).plus(math::Vec(0, 2)));
-		setBackgroundSvg(APP->window->loadSvg(asset::plugin(pluginInstance,"res/SlidePotH.svg")));
-		setHandleSvg(APP->window->loadSvg(asset::plugin(pluginInstance,"res/SlidePotHandleH.svg")));
-	}
-};
-
-struct LatchingPushButton : app::SvgSwitch {
-	LatchingPushButton() {
-		momentary = false;
-		addFrame(APP->window->loadSvg(asset::system("res/ComponentLibrary/BefacoPush_0.svg")));
-		addFrame(APP->window->loadSvg(asset::system("res/ComponentLibrary/BefacoPush_1.svg")));
-	}
-};
-
-struct NKK2 : app::SvgSwitch {
-	NKK2() {
-		addFrame(APP->window->loadSvg(asset::system("res/ComponentLibrary/NKK_0.svg")));
-		addFrame(APP->window->loadSvg(asset::system("res/ComponentLibrary/NKK_2.svg")));
-	}
-};
+#define BLOCK 64
 
 struct Windy : Module {
 	enum ParamIds {
@@ -71,21 +29,35 @@ struct Windy : Module {
 		NUM_LIGHTS
 	};
 
-	Windy() {
+	unsigned offset;
+	wind::ParameterSet parameters;
+	wind::MultiNoiseGenerator generator;
+	float buffer[BLOCK];
+
+	Windy() : offset(0), parameters(), generator() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 		configParam(BOOST_PARAM, 0.f, 1.f, 0.f, "");
 		configParam(LOWER_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(UPPER_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(WAVEFORM_PARAM, 0.f, 3.f, 0.f, "");
+		configParam(UPPER_PARAM, 0.f, 1.f, 1.f, "");
+		configParam(WAVEFORM_PARAM, 0.f, 3.f, 3.f, "");
 		configParam(RINGING_PARAM, 0.f, 3.f, 0.f, "");
 		configParam(PNORMAL_PARAM, 0.f, 1.f, 0.f, "");
 		configParam(PRING_PARAM, 0.f, 1.f, 0.f, "");
 		configParam(PRATIO_PARAM, 0.f, 1.f, 0.f, "");
 		configParam(ATTACK_PARAM, 0.f, 1.f, 0.f, "");
 		configParam(DECAY_PARAM, 0.f, 1.f, 0.f, "");
+
+		for(auto i=0;i<BLOCK;i++) buffer[i]=0;
 	}
 
 	void process(const ProcessArgs& args) override {
+			if(offset==BLOCK) {
+				parameters=wind::ParameterSet(this);
+				generator.Render(buffer,BLOCK,parameters);
+				offset=0;
+			}
+			float output=clamp(buffer[offset++],-5.0f,5.0f);
+			outputs[OUTPUT_OUTPUT].setVoltage(output);
 	}
 };
 

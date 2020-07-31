@@ -17,6 +17,7 @@ namespace wind {
         
         
         struct Range {
+        public:
             double lo;
             double hi;
             double width;

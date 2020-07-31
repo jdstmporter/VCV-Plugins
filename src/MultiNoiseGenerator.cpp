@@ -31,7 +31,7 @@ sources(N), generator(), chooser(), envState(), env() {
 
 
 void MultiNoiseGenerator::reset(const ParameterSet &params) {
-     for(auto index=0;index<sources.size();index++) {
+     for(unsigned long index=0;index<sources.size();index++) {
         SourcePointer source=sources[index];
         source->change(params.mode);
         if(!params.range.contains(source->frequency())) {
@@ -49,7 +49,7 @@ void MultiNoiseGenerator::reset(const ParameterSet &params) {
 void MultiNoiseGenerator::generateN(const unsigned n,data_t *array,double v) {
     double vol=v/sqrt(double(n));
     data_t *it=array;
-    for(auto tick=0;tick<n;tick++) {
+    for(unsigned tick=0;tick<n;tick++) {
         double out=std::accumulate(sources.begin(), sources.end(), 0.0, [](double tmp,SourcePointer &p) {
             return tmp+p->step();
         });

@@ -22,21 +22,19 @@
 
 namespace wind {
     
-    enum  {
-        kParameterLowerID=0,
-        kParameterUpperID=1,
-        kParameterOnID=2,
-        kParameterVolumeID=3,
-        kParameterModeID=4,
-        kParameterRingEdgeID=5,
-        kParameterRingBodyID=6,
-        kParameterPNormalID=7,
-        kParameterPFactorID=8,
-        kParameterEnvelopeID=9,
-        kParameterEnvelopeAttackID=10,
-        kParameterEnvelopeDecayID=11,
-        kParameterNParameters=12
-    };
+enum ParameterIds {
+		kBOOST_PARAM,
+		kRINGING_PARAM,
+		kWAVEFORM_PARAM,
+		kUPPER_PARAM,
+		kLOWER_PARAM,
+		kPNORMAL_PARAM,
+		kPRATIO_PARAM,
+		kPRING_PARAM,
+		kDECAY_PARAM,
+		kATTACK_PARAM,
+		kNUM_PARAMS
+	};
     
     inline unsigned Wave2Int(const WaveForm &w) {
         return static_cast<unsigned>(w);

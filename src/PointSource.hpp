@@ -13,17 +13,17 @@
 #include <iterator>
 
 
-#include "Utility/Randomiser.hpp"
-#include "Utility/Envelope.hpp"
+#include "Randomiser.hpp"
+#include "Envelope.hpp"
 
 namespace wind {
     
         
             enum class WaveForm : unsigned {
-                SINE=0,
-                SQUARE=1,
-                TRIANGLE=2,
-                SAWTOOTH=3
+                SINE=3,
+                SQUARE=2,
+                TRIANGLE=1,
+                SAWTOOTH=0
                 };
         
              

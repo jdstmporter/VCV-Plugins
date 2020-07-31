@@ -52,7 +52,7 @@ bool EnvelopeState::operator!=(const EnvelopeState &o) {
                 auto a=pow(10.0,attack/10.0);
                 auto d=pow(10.0,decay/10.0);
                 //std::cerr << "Envelope RAW " << attack << " " << decay << " Processed " << a << " " << d <<std::endl;
-                double il[4] = {0.0,a,d,(2.0+a)/3.0,1.0};
+                double il[5] = {0.0,a,d,(2.0+a)/3.0,1.0};
                 return std::vector<double>(il,il+4);
             };
 
