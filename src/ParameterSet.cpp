@@ -17,10 +17,10 @@ namespace wind {
 
 #define NOSCILLATORS 100
 
-ParameterSet::ParameterSet(rack::Module *au) {
+ParameterSet::ParameterSet(rack::Module *au,const double rate) : sampleRate(rate) {
     volume = 1.0;
-    auto lo= au->params[kLOWER_PARAM].getValue();
-    auto hi= au->params[kUPPER_PARAM].getValue();
+    auto lo= au->params[kLOWER_PARAM].getValue()*sampleRate/2.0;
+    auto hi= au->params[kUPPER_PARAM].getValue()*sampleRate/2.0;
     range = util::Range(lo,hi);
     mode = static_cast<WaveForm>((unsigned)au->params[kWAVEFORM_PARAM].getValue());
     

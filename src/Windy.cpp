@@ -44,15 +44,15 @@ struct Windy : Module {
 		configParam(PNORMAL_PARAM, 0.f, 1.f, 0.f, "");
 		configParam(PRING_PARAM, 0.f, 1.f, 0.f, "");
 		configParam(PRATIO_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(ATTACK_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(DECAY_PARAM, 0.f, 1.f, 0.f, "");
+		configParam(ATTACK_PARAM, -10.f, 10.f, 0.f, "");
+		configParam(DECAY_PARAM, -10.f, 10.f, 0.f, "");
 
 		for(auto i=0;i<BLOCK;i++) buffer[i]=0;
 	}
 
 	void process(const ProcessArgs& args) override {
 			if(offset==BLOCK) {
-				parameters=wind::ParameterSet(this);
+				parameters=wind::ParameterSet(this,args.sampleRate);
 				generator.Render(buffer,BLOCK,parameters);
 				offset=0;
 			}
