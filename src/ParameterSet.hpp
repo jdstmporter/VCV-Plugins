@@ -29,7 +29,6 @@ enum ParameterIds {
 		kUPPER_PARAM,
 		kLOWER_PARAM,
 		kPNORMAL_PARAM,
-		kPRATIO_PARAM,
 		kPRING_PARAM,
 		kDECAY_PARAM,
 		kATTACK_PARAM,
@@ -47,7 +46,6 @@ enum ParameterIds {
     
     struct ParameterSet {
     public:
-        double volume;
         util::Range range;
         WaveForm mode;
         double pEdge;
@@ -55,8 +53,9 @@ enum ParameterIds {
         unsigned N;
         util::EnvelopeState env;
         double sampleRate;
+        double volume;
         
-        ParameterSet() : volume(sqrt(2)), range(0,44100), mode(WaveForm::SINE), pEdge(2.0e-3), pBody(1.0e-5), N(100), env(), sampleRate(44100) {};
+        ParameterSet() : range(0,44100), mode(WaveForm::SINE), pEdge(2.0e-3), pBody(1.0e-5), N(100), env(), sampleRate(44100), volume(5) {};
         ParameterSet(rack::Module *au,const double rate);
         virtual ~ParameterSet() = default;
         

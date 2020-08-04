@@ -12,7 +12,6 @@ struct Windy : Module {
 		                UPPER_PARAM,
 		                LOWER_PARAM,
 		                PNORMAL_PARAM,
-		                PRATIO_PARAM,
 		                PRING_PARAM,
 		                DECAY_PARAM,
 		                ATTACK_PARAM,
@@ -43,9 +42,8 @@ struct Windy : Module {
 		configParam(RINGING_PARAM, 0.f, 3.f, 0.f, "");
 		configParam(PNORMAL_PARAM, 0.f, 1.f, 0.f, "");
 		configParam(PRING_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(PRATIO_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(ATTACK_PARAM, -10.f, 10.f, 0.f, "");
-		configParam(DECAY_PARAM, -10.f, 10.f, 0.f, "");
+		configParam(ATTACK_PARAM, -10.f, 10.f, 10.f, "");
+		configParam(DECAY_PARAM, -10.f, 10.f, -1.f, "");
 
 		for(auto i=0;i<BLOCK;i++) buffer[i]=0;
 	}
@@ -78,7 +76,6 @@ struct WindyWidget : ModuleWidget {
 		addParam(createParam<SlidePot>(mm2px(Vec(8.504, 23.435)), module, Windy::UPPER_PARAM));
 		addParam(createParam<SlidePot>(mm2px(Vec(26.304, 23.5)), module, Windy::LOWER_PARAM));
 		addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(9.317, 86.12)), module, Windy::PNORMAL_PARAM));
-		addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(23.34, 86.12)), module, Windy::PRATIO_PARAM));
 		addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(37.363, 86.12)), module, Windy::PRING_PARAM));
 		addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(28.348, 109.441)), module, Windy::DECAY_PARAM));
 		addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(11.785, 109.687)), module, Windy::ATTACK_PARAM));

@@ -16,7 +16,7 @@ See LICENSE.txt for this sample’s licensing information
 #include "PointSource.hpp"
 #include "Randomiser.hpp"
 #include "ParameterSet.hpp"
-
+#include "Windy.hpp"
 
 
 
@@ -46,7 +46,7 @@ protected:
 public:
     
     
-    MultiNoiseGenerator(const double sampleRate=44100.0,const unsigned nSources=100);
+    MultiNoiseGenerator(const double sampleRate=SAMPLE_RATE,const unsigned nSources=NOSCILLATORS);
     virtual ~MultiNoiseGenerator() = default;
     
     

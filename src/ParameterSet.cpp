@@ -10,15 +10,14 @@
 #include <numeric>
 #include <iostream>
 #include "Envelope.hpp"
-
+#include "Windy.hpp"
 
 
 namespace wind {
 
-#define NOSCILLATORS 100
 
-ParameterSet::ParameterSet(rack::Module *au,const double rate) : sampleRate(rate) {
-    volume = 1.0;
+
+ParameterSet::ParameterSet(rack::Module *au,const double rate) : sampleRate(rate), volume(OUTPUT_VOLTAGE) {
     auto lo= au->params[kLOWER_PARAM].getValue()*sampleRate/2.0;
     auto hi= au->params[kUPPER_PARAM].getValue()*sampleRate/2.0;
     range = util::Range(lo,hi);
