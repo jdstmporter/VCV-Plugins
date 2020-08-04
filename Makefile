@@ -10,8 +10,7 @@ CXXFLAGS += -std=c++17
 # Static libraries are fine, but they should be added to this plugin's build system.
 LDFLAGS +=
 
-SRC := $(shell find src -name '*.cpp')
-WILDCARD := $(wildcard src/*.cpp)
+SRC := $(wildcard src/*.cpp)
 
 # Add .cpp files to the build
 SOURCES += $(SRC)
@@ -26,5 +25,4 @@ include $(RACK_DIR)/plugin.mk
 
 list:
 	$(info Source list is $(SOURCES) )
-	$(info Wildcard list is $(WILDCARD) )
 
