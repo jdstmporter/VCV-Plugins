@@ -9,40 +9,61 @@
 #define SRC_ETC_ACTIONBUTTON_HPP_
 
 #include <rack.hpp>
-#include <memory>
+#include <event.hpp>
 #include <vector>
+#include <map>
 
-struct ActionSwitchCallback {
+struct ActionSwitch : rack::SvgSwitch {
+	struct Callback {
+		Callback() = default;
+		virtual ~Callback() = default;
+		virtual void operator()(const unsigned uid) = 0;
+	};
 
+	unsigned uid;
+	Callback *callback;
 
-	ActionSwitchCallback() = default;
-	virtual ~ActionSwitchCallback() = default;
-	virtual void operator()(const unsigned uid) = 0;
+	ActionSwitch()  : rack::SvgSwitch(), uid(0), callback(nullptr) {
+		momentary=true;
+	}
+	virtual ~ActionSwitch() = default;
+
+	void setCallback(const Callback *cb) { callback = cb; }
+	virtual void onChange(const rack::event::Change &e) {
+		rack::SvgSwitch::onChange(e);
+		if(callback!=nullptr) (*callback)(uid);
+	}
 };
 
-struct ActionSwitch : rack::SVGSwitch {
-	
-	unsigned uid = 0;
-	ActionSwitchCallback *callback=nullptr;
+struct MultiSwitch : public ActionSwitch::Callback {
+public:
 
-	virtual void step();
-};
+	struct Unit {
+		ActionSwitch *button;
+		rack::ModuleLightWidget *light;
 
-struct ActionMultiSwitch : ActionSwitchCallback {
-	std::vector<ActionSwitch*> switches;
+		Unit(ActionSwitch *b,rack::ModuleLightWidget *l) : button(b), light(l) {};
+		virtual ~Unit() = default;
+	};
 
-	ActionMultiSwitch() : switches() {
-	}
+private:
+	static std::map<bool,std::vector<float>> onOff;
 
-	void add(ActionSwitch *sw) {
-		sw->uid=switches.size();
-		sw->callback=this;
-		switches.push_back(sw);
-	}
+	std::vector<Unit> units;
+	unsigned def;
+	unsigned selected;
 
-	void operator()(const unsigned uid) {
-		// set the value to uid
-	}
+public:
+	MultiSwitch() : ActionSwitch::Callback(), units(), def(0), selected(0) {};
+	virtual ~MultiSwitch() = default;
+
+	void add(const Unit &unit);
+	void add(ActionSwitch *b,rack::ModuleLightWidget *l) { add(Unit(b,l)); }
+	void setDefault(const unsigned d) { def = d; }
+	unsigned getSelected() const { return selected; }
+	void setSelected(const unsigned);
+	void reset() { setSelected(def); }
+	void operator()(const unsigned uid) { setSelected(uid); }
 };
 
 #endif /* SRC_ETC_ACTIONBUTTON_HPP_ */
