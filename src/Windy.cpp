@@ -14,14 +14,16 @@ enum LightIds {
 			NUM_LIGHTS
 	};
 
+struct Windy;
+
 struct WaveformButton : public BefacoActionButton {
-	rack::Module *module;
+	Windy *module;
 	unsigned currentWaveform;
 	bool ready;
 
 	static constexpr unsigned lightCodes[NUM_LIGHTS] = {SINELED_LIGHT,SQUARELED_LIGHT,TRIANGLELED_LIGHT,SAWTOOTHLED_LIGHT};
 
-	WaveformButton(rack::Module *m) : BefacoActionButton() , module(m), currentWaveform(0), ready(true) {};
+	WaveformButton() : BefacoActionButton() , module(nullptr), currentWaveform(0), ready(true) {};
 	virtual ~WaveformButton() = default;
 
 	wind::WaveForm waveform() const { return static_cast<wind::WaveForm>(currentWaveform); }
@@ -32,11 +34,13 @@ struct WaveformButton : public BefacoActionButton {
 		else if(ready) {
 			ready=false;
 			currentWaveform=(currentWaveform+1) % NUM_LIGHTS;
+			if(module!=nullptr) module->wave = waveform();
 			updateWaveFormDisplay();
 		}
 	}
 
 		void updateWaveFormDisplay() {
+			if(module==nullptr) return;
 			for(unsigned i=0;i<NUM_LIGHTS;i++) {
 				auto idx = lightCodes[i];
 				auto b = idx==lightCodes[currentWaveform] ? 1.f : 0.f;
@@ -79,9 +83,9 @@ struct Windy : Module {
 	wind::ParameterSet parameters;
 	wind::MultiNoiseGenerator generator;
 	float buffer[BLOCK];
-	WaveformButton *wbutton;
+	wind::WaveForm wave;
 
-	Windy() : offset(0), parameters(), generator()  {
+	Windy() : offset(0), parameters(), generator(), wave(wind::WaveForm::SINE)  {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 		configParam(BOOST_PARAM, 0.f, 1.f, 0.f, "");
 		configParam(LOWER_PARAM, 0.f, 1.f, 0.f, "");
@@ -94,22 +98,15 @@ struct Windy : Module {
 		configParam(DECAY_PARAM, -10.f, 10.f, -1.f, "");
 
 		for(auto i=0;i<BLOCK;i++) buffer[i]=0;
-		wbutton = new WaveformButton(this);
+
 	}
-	virtual ~Windy() {
-		delete wbutton;
-	}
+
 
 
 	void process(const ProcessArgs& args) override {
 
 			if(offset==BLOCK) {
-				if(wbutton) {
-					parameters=wind::ParameterSet(this,args.sampleRate,wbutton->waveform());
-				}
-				else {
-					parameters=wind::ParameterSet(this,args.sampleRate,wind::WaveForm::SINE);
-				}
+				parameters=wind::ParameterSet(this,args.sampleRate,wave);
 				generator.Render(buffer,BLOCK,parameters);
 				offset=0;
 			}
@@ -142,11 +139,9 @@ struct WindyWidget : ModuleWidget {
 		addParam(createParam<SlidePotV>(mm2px(Vec(26.304, 23.5)), module, Windy::LOWER_PARAM));
 		INFO("CHANGE");
 
-		module->wbutton->box.pos=mm2px(Vec(8.429, 66.269));
-		module->wbutton->paramQuantity=module->paramQuantities[Windy::CHANGEWAVEFORM_PARAM];
-		module->wbutton->box.pos = module->wbutton->box.pos.minus(module->wbutton->box.size.div(2));
+		WaveformButton *wbutton=(WaveformButton *)addParam(createParamCentered<WaveformButton>(mm2px(Vec(8.429, 66.269)), module, Windy::CHANGEWAVEFORM_PARAM));
+		wbutton->module=module;
 
-		//addParam(createParamCentered<BefacoActionButton>(mm2px(Vec(8.429, 66.269)), module, Windy::CHANGEWAVEFORM_PARAM));
 		INFO("Normal");
 		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(9.317, 86.12)), module, Windy::PNORMAL_PARAM));
 		INFO("RING");
