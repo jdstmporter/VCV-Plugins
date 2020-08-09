@@ -17,6 +17,7 @@
 #include <asset.hpp>
 #include <map>
 #include <type_traits>
+#include <string>
 
 namespace rack { namespace componentlibrary {
 
@@ -24,20 +25,14 @@ enum class Orientation {
 	Horizontal, Vertical
 };
 
+
+
 template<Orientation O>
 struct SlidePot : app::SvgSlider {
 
-	static std::map<Orientation,std::string> backgrounds = {
-			std::make_pair(Orientation::Horizontal,"res/SlidePotH.svg"),
-			std::make_pair(Orientation::Vertical,"res/SlidePot.svg")
-	};
+public:
+	SlidePot() : app::SvgSlider() {
 
-	static std::map<Orientation,std::string> handles = {
-			std::make_pair(Orientation::Horizontal,"res/SlidePotHandleH.svg"),
-			std::make_pair(Orientation::Vertical,"res/SlidePotHandle.svg")
-	};
-
-	SlidePot() {
 		math::Vec margin = (O==Orientation::Vertical) ? math::Vec(3.5, 3.5) : math::Vec(0,2);
 		horizontal=(O==Orientation::Horizontal);
 
@@ -53,8 +48,12 @@ struct SlidePot : app::SvgSlider {
 			minHandlePos = app::mm2px(math::Vec(0.738, 0.738).plus(margin));
 			break;
 		}
-		setBackgroundSvg(APP->window->loadSvg(asset::plugin(pluginInstance,backgrounds[O])));
-		setHandleSvg(APP->window->loadSvg(asset::plugin(pluginInstance,handles[O])));
+		auto isH = O==Orientation::Horizontal;
+		auto bg = isH ? "res/SlidePotH.svg" : "res/SlidePot.svg";
+		auto handle = isH ? "res/SlidePotHandleH.svg" : "res/SlidePotHandle.svg";
+
+		setBackgroundSvg(APP->window->loadSvg(asset::plugin(pluginInstance,bg)));
+		setHandleSvg(APP->window->loadSvg(asset::plugin(pluginInstance,handle)));
 	}
 };
 
@@ -65,23 +64,22 @@ struct LatchingPushButton : public app::SvgSwitch {
 	LatchingPushButton();
 };
 
+
+
 template<Orientation O>
 struct OnOffSwitch2 : public app::SvgSwitch {
 
-	static std::map<Orientation,std::string> offs = {
-				std::make_pair(Orientation::Horizontal,"res/NNK_0H.svg"),
-				std::make_pair(Orientation::Vertical,"res/NNK_0.svg")
-		};
 
-		static std::map<Orientation,std::string> ons = {
-				std::make_pair(Orientation::Horizontal,"res/NNK_2H.svg"),
-				std::make_pair(Orientation::Vertical,"res/NNK2.svg")
-		};
+public:
+	OnOffSwitch2() : app::SvgSwitch() {
 
-	OnOffSwitch2() {
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,offs[O])));
-		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,ons[O])));
-	}
+		auto isH = O==Orientation::Horizontal;
+		auto off = isH ? "res/NKK_0H.svg" : "res/NKK_0.svg";
+		auto on = isH ? "res/NKK_2H.svg" : "res/NKK_2.svg";
+
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,off)));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,on)));
+	};
 };
 
 using OnOffSwitch2V = OnOffSwitch2<Orientation::Vertical>;
@@ -92,11 +90,12 @@ struct FourSwitch : public app::SvgSwitch {
 	FourSwitch();
 };
 
-template <typename S, class = typename std::enable_if<std::is_base_of<SvgSwitch,S>::value>::type>
-struct ActionButton : S {
+template <typename S, class = typename std::enable_if<std::is_base_of<app::Switch,S>::value>::type>
+struct ActionButton : public S {
 
 	ActionButton()  : S() {
-		momentary=true;
+		static_assert(std::is_base_of<app::Switch,S>::value,"ActionButton must derive from Switch");
+		this->momentary=true;
 	}
 	virtual ~ActionButton() = default;
 
