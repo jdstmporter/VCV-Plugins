@@ -13,6 +13,8 @@ namespace rack { namespace componentlibrary {
 
 
 
+
+
 FourSwitch::FourSwitch()  {
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/CKSSFour_0.svg")));
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/CKSSFour_1.svg")));

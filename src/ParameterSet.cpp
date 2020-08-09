@@ -17,11 +17,11 @@ namespace wind {
 
 
 
-ParameterSet::ParameterSet(rack::Module *au,const double rate) : sampleRate(rate), volume(OUTPUT_VOLTAGE) {
+ParameterSet::ParameterSet(rack::Module *au,const double rate,const wind::WaveForm &waveform) :
+		mode(waveform), sampleRate(rate), volume(OUTPUT_VOLTAGE) {
     auto lo= au->params[kLOWER_PARAM].getValue()*sampleRate/2.0;
     auto hi= au->params[kUPPER_PARAM].getValue()*sampleRate/2.0;
     range = util::Range(lo,hi);
-    mode = static_cast<WaveForm>((unsigned)au->params[kWAVEFORM_PARAM].getValue());
     
     auto ringMode = (unsigned)au->params[kRINGING_PARAM].getValue();
     auto edge = ringMode==1 || ringMode==3;

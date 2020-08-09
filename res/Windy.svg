@@ -31,17 +31,17 @@
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
      inkscape:zoom="1.4"
-     inkscape:cx="-220.4225"
-     inkscape:cy="273.57143"
+     inkscape:cx="-73.279641"
+     inkscape:cy="275"
      inkscape:document-units="mm"
      inkscape:current-layer="layer3"
      inkscape:document-rotation="0"
      showgrid="false"
      inkscape:showpageshadow="false"
-     inkscape:window-width="2345"
+     inkscape:window-width="1763"
      inkscape:window-height="1035"
-     inkscape:window-x="1920"
-     inkscape:window-y="49"
+     inkscape:window-x="17"
+     inkscape:window-y="271"
      inkscape:window-maximized="0" />
   <metadata
      id="metadata5">
@@ -793,9 +793,9 @@
   </g>
   <g
      inkscape:groupmode="layer"
-     id="layer2"
+     id="components"
      inkscape:label="components"
-     style="display:none">
+     style="display:inline">
     <circle
        style="fill:#0000ff;fill-rule:evenodd;stroke-width:0.264583"
        id="output"
@@ -888,54 +888,46 @@
       <title
          id="title1425">ringing</title>
     </circle>
-    <path
-       sodipodi:arc-type="slice"
-       sodipodi:end="6.2687897"
-       sodipodi:start="6.2741429"
-       sodipodi:ry="2"
-       sodipodi:rx="2"
-       sodipodi:cy="59.73914"
-       sodipodi:cx="16.914433"
-       sodipodi:type="arc"
-       id="LEDsine"
-       style="fill:#ff00ff;stroke-width:0.136315"
-       d="m 18.914351,59.721055 a 2,2 0 0 1 -1.979157,2.017977 2,2 0 0 1 -2.020624,-1.976455 2,2 0 0 1 1.973749,-2.023267 2,2 0 0 1 2.025906,1.971039 l -1.999792,0.02879 z" />
-    <path
-       style="display:inline;fill:#ff00ff;stroke-width:0.136315"
-       id="LEDsquare"
-       sodipodi:type="arc"
-       sodipodi:cx="16.914433"
-       sodipodi:cy="64.092163"
-       sodipodi:rx="2"
-       sodipodi:ry="2"
-       sodipodi:start="6.2741429"
-       sodipodi:end="6.2687897"
-       sodipodi:arc-type="slice"
-       d="m 18.914351,64.074079 a 2,2 0 0 1 -1.979157,2.017976 2,2 0 0 1 -2.020624,-1.976454 2,2 0 0 1 1.973749,-2.023267 2,2 0 0 1 2.025906,1.971039 l -1.999792,0.02879 z" />
-    <path
-       style="display:inline;fill:#ff00ff;stroke-width:0.136315"
-       id="LEDtriangle"
-       sodipodi:type="arc"
-       sodipodi:cx="16.914433"
-       sodipodi:cy="68.445183"
-       sodipodi:rx="2"
-       sodipodi:ry="2"
-       sodipodi:start="6.2741429"
-       sodipodi:end="6.2687897"
-       sodipodi:arc-type="slice"
-       d="m 18.914351,68.427098 a 2,2 0 0 1 -1.979157,2.017977 2,2 0 0 1 -2.020624,-1.976455 2,2 0 0 1 1.973749,-2.023267 2,2 0 0 1 2.025906,1.97104 l -1.999792,0.02879 z" />
-    <path
-       style="display:inline;fill:#ff00ff;stroke-width:0.136315"
-       id="LEDsawtooth"
-       sodipodi:type="arc"
-       sodipodi:cx="16.914433"
-       sodipodi:cy="72.79821"
-       sodipodi:rx="2"
-       sodipodi:ry="2"
-       sodipodi:start="6.2741429"
-       sodipodi:end="6.2687897"
-       sodipodi:arc-type="slice"
-       d="m 18.914351,72.780126 a 2,2 0 0 1 -1.979157,2.017976 2,2 0 0 1 -2.020624,-1.976454 2,2 0 0 1 1.973749,-2.023267 2,2 0 0 1 2.025906,1.971039 l -1.999792,0.02879 z" />
+    <circle
+       label="sineLED"
+       style="display:inline;
+fill:#ff00ff;
+fill-rule:evenodd;
+stroke-width:0.264583"
+       r="2"
+       cy="59.73914"
+       cx="16.914433"
+       id="sineLED" />
+    <circle
+       id="squareLED"
+       cx="16.914433"
+       cy="64.092163"
+       r="2"
+       style="display:inline;
+fill:#ff00ff;
+fill-rule:evenodd;
+stroke-width:0.264583"
+       label="squareLED" />
+    <circle
+       label="triangleLED"
+       style="display:inline;
+fill:#ff00ff;
+fill-rule:evenodd;
+stroke-width:0.264583"
+       r="2"
+       cy="68.445183"
+       cx="16.914433"
+       id="triangleLED" />
+    <circle
+       id="sawtoothLED"
+       cx="16.914433"
+       cy="72.79821"
+       r="2"
+       style="display:inline;
+fill:#ff00ff;
+fill-rule:evenodd;
+stroke-width:0.264583"
+       label="swtoothLED" />
     <circle
        r="4"
        label="changeWaveform"
