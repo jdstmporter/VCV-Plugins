@@ -3,15 +3,15 @@
 
 struct Windy : Module {
 	enum ParamIds {
-		BOOST_PARAM,
-		RINGING_PARAM,
 		UPPER_PARAM,
 		LOWER_PARAM,
 		CHANGEWAVEFORM_PARAM,
+		RINGING_PARAM,
 		PNORMAL_PARAM,
 		PRING_PARAM,
 		ATTACK_PARAM,
 		DECAY_PARAM,
+		BOOST_PARAM,
 		NUM_PARAMS
 	};
 	enum InputIds {
@@ -31,15 +31,15 @@ struct Windy : Module {
 
 	Windy() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-		configParam(BOOST_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(RINGING_PARAM, 0.f, 1.f, 0.f, "");
 		configParam(UPPER_PARAM, 0.f, 1.f, 0.f, "");
 		configParam(LOWER_PARAM, 0.f, 1.f, 0.f, "");
 		configParam(CHANGEWAVEFORM_PARAM, 0.f, 1.f, 0.f, "");
+		configParam(RINGING_PARAM, 0.f, 1.f, 0.f, "");
 		configParam(PNORMAL_PARAM, 0.f, 1.f, 0.f, "");
 		configParam(PRING_PARAM, 0.f, 1.f, 0.f, "");
 		configParam(ATTACK_PARAM, 0.f, 1.f, 0.f, "");
 		configParam(DECAY_PARAM, 0.f, 1.f, 0.f, "");
+		configParam(BOOST_PARAM, 0.f, 1.f, 0.f, "");
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -57,15 +57,15 @@ struct WindyWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		addParam(createParam<RoundBlackKnob>(mm2px(Vec(-52.455, -113.376)), module, Windy::BOOST_PARAM));
-		addParam(createParam<RoundBlackKnob>(mm2px(Vec(-38.852, -77.536)), module, Windy::RINGING_PARAM));
-		addParam(createParam<RoundBlackKnob>(mm2px(Vec(8.504, 23.435)), module, Windy::UPPER_PARAM));
-		addParam(createParam<RoundBlackKnob>(mm2px(Vec(26.304, 23.5)), module, Windy::LOWER_PARAM));
+		addParam(createParam<RoundBlackKnob>(mm2px(Vec(8.504, 18.143)), module, Windy::UPPER_PARAM));
+		addParam(createParam<RoundBlackKnob>(mm2px(Vec(26.304, 18.224)), module, Windy::LOWER_PARAM));
 		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(8.429, 66.269)), module, Windy::CHANGEWAVEFORM_PARAM));
+		addParam(createParam<RoundBlackKnob>(mm2px(Vec(34.316, 61.302)), module, Windy::RINGING_PARAM));
 		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(9.317, 86.12)), module, Windy::PNORMAL_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(37.363, 86.12)), module, Windy::PRING_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(29.426, 86.12)), module, Windy::PRING_PARAM));
 		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(11.785, 109.687)), module, Windy::ATTACK_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(33.682, 109.687)), module, Windy::DECAY_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(28.39, 109.687)), module, Windy::DECAY_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(50.271, 109.687)), module, Windy::BOOST_PARAM));
 
 		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(45.705, 39.364)), module, Windy::OUTPUT_OUTPUT));
 

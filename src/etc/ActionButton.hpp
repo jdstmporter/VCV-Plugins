@@ -12,58 +12,59 @@
 #include <event.hpp>
 #include <vector>
 #include <map>
+#include <type_traits>
 
-struct ActionSwitch : rack::SvgSwitch {
-	struct Callback {
-		Callback() = default;
-		virtual ~Callback() = default;
-		virtual void operator()(const unsigned uid) = 0;
-	};
-
-	unsigned uid;
-	Callback *callback;
-
-	ActionSwitch()  : rack::SvgSwitch(), uid(0), callback(nullptr) {
-		momentary=true;
+template <typename T, class = typename std::enable_if<std::is_base_of<rack::app::Switch,T>::value>::type>
+struct ActionSwitch : T {
+private:
+	rack::ParamWidget *callback;
+public:
+	ActionSwitch()  : rack::SvgSwitch(), callback(nullptr) {
+		this->momentary=true;
 	}
 	virtual ~ActionSwitch() = default;
 
-	void setCallback(const Callback *cb) { callback = cb; }
+	void setCallback(rack::ParamWidget *cb) { callback = cb; }
+
 	virtual void onChange(const rack::event::Change &e) {
 		rack::SvgSwitch::onChange(e);
-		if(callback!=nullptr) (*callback)(uid);
+		if(callback != nullptr && paramQuantity != nullptr) {
+			if(paramQuantity->isMin()) callback->step();
+		}
 	}
 };
 
-struct MultiSwitch : public ActionSwitch::Callback {
+template<unsigned N>
+struct RadioButtons : public rack::ParamWidget {
 public:
+	rack::widget::FramebufferWidget* fb;
+	ActionSwitch<rack::BefacoPush> *sw;
+	unsigned it;
 
-	struct Unit {
-		ActionSwitch *button;
-		rack::ModuleLightWidget *light;
+public:
+	RadioButtons() : rack::ParamWidget(), it(0) {
+		fb = new rack::widget::FramebufferWidget;
+		addChild(fb);
 
-		Unit(ActionSwitch *b,rack::ModuleLightWidget *l) : button(b), light(l) {};
-		virtual ~Unit() = default;
+		for(unsigned i=0;i<N;i++) {
+			auto light=new rack::MediumLight<rack::RedLight>();
+			fb->addChild(light);
+		}
+		sw = new rack::BefacoPush();
+		sw->callback=this;
+		fb->addChild(sw);
+
+
+	};
+	virtual ~RadioButtons() = default;
+
+	unsigned selected() const { return it; }
+
+	virtual void onChange(const rack::event::Change &e) {
+		it=(it+1)%N;
 	};
 
-private:
-	static std::map<bool,std::vector<float>> onOff;
-
-	std::vector<Unit> units;
-	unsigned def;
-	unsigned selected;
-
-public:
-	MultiSwitch() : ActionSwitch::Callback(), units(), def(0), selected(0) {};
-	virtual ~MultiSwitch() = default;
-
-	void add(const Unit &unit);
-	void add(ActionSwitch *b,rack::ModuleLightWidget *l) { add(Unit(b,l)); }
-	void setDefault(const unsigned d) { def = d; }
-	unsigned getSelected() const { return selected; }
-	void setSelected(const unsigned);
-	void reset() { setSelected(def); }
-	void operator()(const unsigned uid) { setSelected(uid); }
+	virtual void reset() {};
 };
 
 #endif /* SRC_ETC_ACTIONBUTTON_HPP_ */

@@ -6,57 +6,39 @@
 
 #define BLOCK 64
 
-enum LightIds {
-			SINELED_LIGHT,
-			SQUARELED_LIGHT,
-			TRIANGLELED_LIGHT,
-			SAWTOOTHLED_LIGHT,
-			NUM_LIGHTS
-	};
+
 
 struct Windy;
 
-struct WaveformButton : public BefacoActionButton {
-	Windy *module;
-	unsigned currentWaveform;
-	bool ready;
+struct SwitchCallback {
+	SwitchCallback() = default;
+	virtual ~SwitchCallback() = default;
 
-	static constexpr unsigned lightCodes[NUM_LIGHTS] = {SINELED_LIGHT,SQUARELED_LIGHT,TRIANGLELED_LIGHT,SAWTOOTHLED_LIGHT};
-
-	WaveformButton() : BefacoActionButton() , module(nullptr), currentWaveform(0), ready(true) {};
-	virtual ~WaveformButton() = default;
-
-	wind::WaveForm waveform() const { return static_cast<wind::WaveForm>(currentWaveform); }
-
-	virtual void didFire(const rack::event::Change &e) {
-		bool value = this->paramQuantity->getValue()>0;
-		if(!value) ready=true;
-		else if(ready) {
-			ready=false;
-			currentWaveform=(currentWaveform+1) % NUM_LIGHTS;
-			if(module!=nullptr) module->wave = waveform();
-			updateWaveFormDisplay();
-		}
-	}
-
-		void updateWaveFormDisplay() {
-			if(module==nullptr) return;
-			for(unsigned i=0;i<NUM_LIGHTS;i++) {
-				auto idx = lightCodes[i];
-				auto b = idx==lightCodes[currentWaveform] ? 1.f : 0.f;
-				module->lights[idx].setBrightness(b);
-			}
-		}
-
-		void resetWaveForm() {
-			currentWaveform=0;
-			updateWaveFormDisplay();
-		}
-
-
+	virtual void step() = 0;
 };
 
-struct Windy : Module {
+template <typename T, class = typename std::enable_if<std::is_base_of<rack::app::Switch,T>::value>::type>
+struct ActionSwitch : T {
+	SwitchCallback *callback;
+
+	ActionSwitch()  : T(), callback(nullptr) {
+		this->momentary=true;
+	}
+	virtual ~ActionSwitch() = default;
+
+	void setCallback(rack::ParamWidget *cb) { callback = cb; }
+
+	virtual void onChange(const rack::event::Change &e) override {
+		rack::SvgSwitch::onChange(e);
+		if(callback != nullptr && this->paramQuantity != nullptr) {
+			if(this->paramQuantity->isMin()) callback->step();
+		}
+	}
+};
+
+
+
+struct Windy : Module, SwitchCallback {
 	enum ParamIds {
 		BOOST_PARAM,
 		RINGING_PARAM,
@@ -76,6 +58,13 @@ struct Windy : Module {
 		OUTPUT_OUTPUT,
 		NUM_OUTPUTS
 	};
+	enum LightIds {
+				SINELED_LIGHT,
+				SQUARELED_LIGHT,
+				TRIANGLELED_LIGHT,
+				SAWTOOTHLED_LIGHT,
+				NUM_LIGHTS
+		};
 
 
 
@@ -83,9 +72,9 @@ struct Windy : Module {
 	wind::ParameterSet parameters;
 	wind::MultiNoiseGenerator generator;
 	float buffer[BLOCK];
-	wind::WaveForm wave;
+	unsigned wave;
 
-	Windy() : offset(0), parameters(), generator(), wave(wind::WaveForm::SINE)  {
+	Windy() : offset(0), parameters(), generator(), wave(NUM_LIGHTS-1)  {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 		configParam(BOOST_PARAM, 0.f, 1.f, 0.f, "");
 		configParam(LOWER_PARAM, 0.f, 1.f, 0.f, "");
@@ -101,12 +90,30 @@ struct Windy : Module {
 
 	}
 
+	void updateLights() {
+		for(unsigned i=0;i<NUM_LIGHTS;i++) {
+			auto b = (i==wave) ? 1.f : 0.f;
+			lights[i].setBrightness(b);
+		}
+	}
+
+	void resetLights() {
+		wave=0;
+		updateLights();
+	}
+
+	virtual void step() override {
+		wave=(wave+1)%NUM_LIGHTS;
+		updateLights();
+		INFO("Current waveform is %d",wave);
+	};
 
 
 	void process(const ProcessArgs& args) override {
 
 			if(offset==BLOCK) {
-				parameters=wind::ParameterSet(this,args.sampleRate,wave);
+				auto w = static_cast<wind::WaveForm>(wave);
+				parameters=wind::ParameterSet(this,args.sampleRate,w);
 				generator.Render(buffer,BLOCK,parameters);
 				offset=0;
 			}
@@ -117,7 +124,7 @@ struct Windy : Module {
 
 
 struct WindyWidget : ModuleWidget {
-
+	using Button = ActionSwitch<BefacoPush>;
 
 
 	WindyWidget(Windy* module) {
@@ -130,34 +137,37 @@ struct WindyWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
 		INFO("BOOST");
-		addParam(createParam<OnOffSwitch2V>(mm2px(Vec(-52.455, -113.376)), module, Windy::BOOST_PARAM));
+		addParam(createParamCentered<OnOffSwitch2V>(mm2px(Vec(50.271, 109.687	)), module, Windy::BOOST_PARAM));
 		INFO("RINGER");
-		addParam(createParam<FourSwitch>(mm2px(Vec(-38.852, -77.536)), module, Windy::RINGING_PARAM));
+		addParam(createParam<FourSwitch>(mm2px(Vec(34.316, 61.302)), module, Windy::RINGING_PARAM));
 		INFO("UPPER");
-		addParam(createParam<SlidePotV>(mm2px(Vec(8.504, 23.435)), module, Windy::UPPER_PARAM));
+		addParam(createParam<SlidePotV>(mm2px(Vec(8.504, 18.143)), module, Windy::UPPER_PARAM));
 		INFO("LOWER");
-		addParam(createParam<SlidePotV>(mm2px(Vec(26.304, 23.5)), module, Windy::LOWER_PARAM));
+		addParam(createParam<SlidePotV>(mm2px(Vec(26.304, 18.224)), module, Windy::LOWER_PARAM));
 		INFO("CHANGE");
 
-		WaveformButton *wbutton=(WaveformButton *)addParam(createParamCentered<WaveformButton>(mm2px(Vec(8.429, 66.269)), module, Windy::CHANGEWAVEFORM_PARAM));
-		wbutton->module=module;
+
+		auto wbutton=(Button *)createParamCentered<Button>(mm2px(Vec(8.429, 66.269)), module, Windy::CHANGEWAVEFORM_PARAM);
+		wbutton->callback=module;
+		addParam(wbutton);
+
 
 		INFO("Normal");
 		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(9.317, 86.12)), module, Windy::PNORMAL_PARAM));
 		INFO("RING");
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(37.363, 86.12)), module, Windy::PRING_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(29.426, 86.12)), module, Windy::PRING_PARAM));
 		INFO("ATTACK");
 		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(11.785, 109.687)), module, Windy::ATTACK_PARAM));
 		INFO("DECAY");
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(33.682, 109.687)), module, Windy::DECAY_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(28.39, 109.687)), module, Windy::DECAY_PARAM));
 		INFO("OUT");
 		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(45.705, 39.364)), module, Windy::OUTPUT_OUTPUT));
 
 		INFO("LEDs");
-		addChild(createLightCentered<MediumLight<RedLight>>(mm2px(Vec(16.914, 59.739)), module, SINELED_LIGHT));
-		addChild(createLightCentered<MediumLight<RedLight>>(mm2px(Vec(16.914, 64.092)), module, SQUARELED_LIGHT));
-		addChild(createLightCentered<MediumLight<RedLight>>(mm2px(Vec(16.914, 68.445)), module, TRIANGLELED_LIGHT));
-		addChild(createLightCentered<MediumLight<RedLight>>(mm2px(Vec(16.914, 72.798)), module, SAWTOOTHLED_LIGHT));
+		addChild(createLightCentered<MediumLight<RedLight>>(mm2px(Vec(16.914, 59.739)), module, Windy::SINELED_LIGHT));
+		addChild(createLightCentered<MediumLight<RedLight>>(mm2px(Vec(16.914, 64.092)), module, Windy::SQUARELED_LIGHT));
+		addChild(createLightCentered<MediumLight<RedLight>>(mm2px(Vec(16.914, 68.445)), module, Windy::TRIANGLELED_LIGHT));
+		addChild(createLightCentered<MediumLight<RedLight>>(mm2px(Vec(16.914, 72.798)), module, Windy::SAWTOOTHLED_LIGHT));
 		INFO("BUILT");
 	}
 };
