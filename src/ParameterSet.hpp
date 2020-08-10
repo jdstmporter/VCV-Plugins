@@ -64,10 +64,11 @@ protected:
         ParameterSet() : envActive(false), envAttack(0),envDecay(0), ringMode(0),
         		range(0,44100), mode(WaveForm::SINE), pEdge(2.0e-3), pBody(1.0e-5), N(100), env(),
         		sampleRate(44100), volume(5)  {};
-        ParameterSet(rack::Module *au,const double rate,const WaveForm &);
+        ParameterSet(rack::Module *au,const double rate,const WaveForm &,const unsigned, const bool);
         virtual ~ParameterSet() = default;
         
         void dump(const ParameterSet &) const;
+        bool changeProbability(const ParameterSet &old) const;
     };
 }
 

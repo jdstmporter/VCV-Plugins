@@ -90,27 +90,89 @@ struct FourSwitch : public app::SvgSwitch {
 	FourSwitch();
 };
 
-template <typename S, class = typename std::enable_if<std::is_base_of<app::Switch,S>::value>::type>
-struct ActionButton : public S {
+struct SwitchCallback {
+	SwitchCallback() = default;
+	virtual ~SwitchCallback() = default;
 
-	ActionButton()  : S() {
-		static_assert(std::is_base_of<app::Switch,S>::value,"ActionButton must derive from Switch");
-		this->momentary=true;
-	}
-	virtual ~ActionButton() = default;
-
-	virtual void onChange(const rack::event::Change &e) {
-		S::onChange(e);
-		didFire(e);
-	}
-
-	virtual void didFire(const rack::event::Change &) = 0;
+	virtual void step() = 0;
+	virtual void reset() = 0;
 };
 
-using BefacoActionButton = ActionButton<BefacoPush>;
-using LEDActionButton = ActionButton<LEDButton>;
-using CKD6ActionButton = ActionButton<CKD6>;
-using TL1105ActionButton = ActionButton<TL1105>;
+template <typename T, class = typename std::enable_if<std::is_base_of<rack::app::Switch,T>::value>::type>
+struct ActionSwitch : T {
+	SwitchCallback *callback;
+
+	ActionSwitch()  : T(), callback(nullptr) {
+		this->momentary=true;
+	}
+	virtual ~ActionSwitch() = default;
+
+	void setCallback(rack::ParamWidget *cb) { callback = cb; }
+
+	virtual void onChange(const rack::event::Change &e) override {
+		rack::SvgSwitch::onChange(e);
+		if(callback != nullptr && this->paramQuantity != nullptr) {
+			if(this->paramQuantity->isMin()) callback->step();
+		}
+	}
+};
+
+template<unsigned N>
+struct MultiSwitch : public SwitchCallback {
+	Module *module;
+	unsigned offset;
+	unsigned value;
+
+	MultiSwitch(Module *m,const unsigned o=0) : SwitchCallback(), module(m), offset(o), value(N-1) {}
+	virtual ~MultiSwitch() = default;
+
+
+	void updateLights() {
+		if(module==nullptr) return;
+		for(unsigned i=0;i<N;i++) {
+			auto b = (i==value) ? 1.f : 0.f;
+			module->lights[i+offset].setBrightness(b);
+		}
+	}
+
+	virtual void reset() override {
+		value=N-1;
+		updateLights();
+	}
+
+	virtual void step() override {
+		value=(value+1)%N;
+		updateLights();
+		INFO("Current multiswitch value is %d",value);
+	};
+
+};
+
+struct OnOffSwitch : public SwitchCallback {
+	Module *module;
+	unsigned offset;
+	bool value;
+
+	OnOffSwitch(Module *m,const unsigned o=0) : SwitchCallback(), module(m), offset(o), value(false) {}
+	virtual ~OnOffSwitch() = default;
+
+
+
+	virtual void reset() override {
+		value=false;
+		module->lights[offset].setBrightness(0.0);
+	}
+
+
+	virtual void step() override {
+		INFO("Click");
+		value = !value;
+		auto b = value ? 1.f : 0.f;
+		module->lights[offset].setBrightness(b);
+	}
+};
+
+
 }}
 
 

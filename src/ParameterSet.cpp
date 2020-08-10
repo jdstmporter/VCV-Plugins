@@ -17,13 +17,13 @@ namespace wind {
 
 
 
-ParameterSet::ParameterSet(rack::Module *au,const double rate,const WaveForm &waveform) :
-		mode(waveform), sampleRate(rate), volume(OUTPUT_VOLTAGE) {
+ParameterSet::ParameterSet(rack::Module *au,const double rate,
+		const WaveForm &waveform,const unsigned ring,const bool e) :
+		envActive(e), ringMode(ring), mode(waveform), sampleRate(rate), volume(OUTPUT_VOLTAGE) {
     auto lo = au->params[LOWER_PARAM].getValue()*sampleRate/2.0;
     auto hi = au->params[UPPER_PARAM].getValue()*sampleRate/2.0;
     range = util::Range(lo,hi);
     
-    ringMode = (unsigned)au->params[RINGING_PARAM].getValue();
     auto edge = ringMode==1 || ringMode==3;
     auto body = ringMode==2 || ringMode==3;
     auto pNormal = au->params[PNORMAL_PARAM].getValue();
@@ -38,12 +38,15 @@ ParameterSet::ParameterSet(rack::Module *au,const double rate,const WaveForm &wa
     pBody=(body) ? pRing : pNormal;
     N = NOSCILLATORS; //(unsigned)au->Globals()->GetParameter(kParameterNID);
     
-    envActive=au->params[BOOST_PARAM].getValue() != 0;
     envAttack=au->params[ATTACK_PARAM].getValue();
     envDecay=au->params[DECAY_PARAM].getValue();
     env = util::EnvelopeState(envAttack,envDecay,envActive);
     
 };
+
+bool ParameterSet::changeProbability(const ParameterSet &old) const {
+	return pEdge != old.pEdge || pBody != old.pBody;
+}
 
 void ParameterSet::dump(const ParameterSet &old) const {
 	if(range != old.range) INFO("RANGE (%f,%f) -> (%f,%f)",old.range.lo,old.range.hi,range.lo,range.hi);
