@@ -85,6 +85,8 @@ namespace wind {
     }
 }
 
+bool operator==(const wind::util::Range &,const wind::util::Range &);
+bool operator!=(const wind::util::Range &,const wind::util::Range &);
 
 
 

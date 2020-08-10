@@ -70,11 +70,12 @@ struct Windy : Module, SwitchCallback {
 
 	unsigned offset;
 	wind::ParameterSet parameters;
+	wind::ParameterSet oldParameters;
 	wind::MultiNoiseGenerator generator;
 	float buffer[BLOCK];
 	unsigned wave;
 
-	Windy() : offset(0), parameters(), generator(), wave(NUM_LIGHTS-1)  {
+	Windy() : offset(0), parameters(), oldParameters(), generator(), wave(NUM_LIGHTS-1)  {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 		configParam(BOOST_PARAM, 0.f, 1.f, 0.f, "");
 		configParam(LOWER_PARAM, 0.f, 1.f, 0.f, "");
@@ -113,9 +114,11 @@ struct Windy : Module, SwitchCallback {
 
 			if(offset==BLOCK) {
 				auto w = static_cast<wind::WaveForm>(wave);
+				oldParameters=parameters;
 				parameters=wind::ParameterSet(this,args.sampleRate,w);
 				generator.Render(buffer,BLOCK,parameters);
 				offset=0;
+				parameters.dump(oldParameters);
 			}
 			float output=clamp(buffer[offset++],-5.0f,5.0f);
 			outputs[OUTPUT_OUTPUT].setVoltage(output);
