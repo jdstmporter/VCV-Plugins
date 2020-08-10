@@ -31,3 +31,10 @@ void RandomInteger::rebase(unsigned max) {
     actor.param(par);
 };
 }}
+
+bool operator==(const wind::util::Range &l,const wind::util::Range &r) {
+	return l.lo==r.lo && l.hi==r.hi;
+}
+bool operator!=(const wind::util::Range &l,const wind::util::Range &r) {
+	return l.lo!=r.lo || l.hi!=r.hi;
+}
