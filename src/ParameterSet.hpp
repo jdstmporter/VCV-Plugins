@@ -23,16 +23,16 @@
 namespace wind {
     
 enum ParameterIds {
-		kBOOST_PARAM,
-		kRINGING_PARAM,
-		kUPPER_PARAM,
-		kLOWER_PARAM,
-		kWAVEFORM_PARAM,
-		kPNORMAL_PARAM,
-		kPRING_PARAM,
-		kATTACK_PARAM,
-		kDECAY_PARAM,
-		kNUM_PARAMS
+		BOOST_PARAM,
+		RINGING_PARAM,
+		UPPER_PARAM,
+		LOWER_PARAM,
+		WAVEFORM_PARAM,
+		PNORMAL_PARAM,
+		PRING_PARAM,
+		ATTACK_PARAM,
+		DECAY_PARAM,
+		NUM_PARAMS
 	};
     
     inline unsigned Wave2Int(const WaveForm &w) {

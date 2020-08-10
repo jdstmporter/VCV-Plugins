@@ -39,18 +39,7 @@ struct ActionSwitch : T {
 
 
 struct Windy : Module, SwitchCallback {
-	enum ParamIds {
-		BOOST_PARAM,
-		RINGING_PARAM,
-		UPPER_PARAM,
-		LOWER_PARAM,
-		CHANGEWAVEFORM_PARAM,
-		PNORMAL_PARAM,
-		PRING_PARAM,
-		ATTACK_PARAM,
-		DECAY_PARAM,
-		NUM_PARAMS
-	};
+
 	enum InputIds {
 		NUM_INPUTS
 	};
@@ -76,16 +65,16 @@ struct Windy : Module, SwitchCallback {
 	unsigned wave;
 
 	Windy() : offset(0), parameters(), oldParameters(), generator(), wave(NUM_LIGHTS-1)  {
-		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-		configParam(BOOST_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(LOWER_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(UPPER_PARAM, 0.f, 1.f, 1.f, "");
-		configParam(CHANGEWAVEFORM_PARAM, 0.f, 3.f, 0.f, "");
-		configParam(RINGING_PARAM, 0.f, 3.f, 0.f, "");
-		configParam(PNORMAL_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(PRING_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(ATTACK_PARAM, -10.f, 10.f, 10.f, "");
-		configParam(DECAY_PARAM, -10.f, 10.f, -1.f, "");
+		config(wind::NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
+		configParam(wind::BOOST_PARAM, 0.f, 1.f, 0.f, "");
+		configParam(wind::LOWER_PARAM, 0.f, 1.f, 0.f, "");
+		configParam(wind::UPPER_PARAM, 0.f, 1.f, 1.f, "");
+		configParam(wind::WAVEFORM_PARAM, 0.f, 3.f, 0.f, "");
+		configParam(wind::RINGING_PARAM, 0.f, 3.f, 0.f, "");
+		configParam(wind::PNORMAL_PARAM, 0.f, 1.f, 0.f, "");
+		configParam(wind::PRING_PARAM, 0.f, 1.f, 0.f, "");
+		configParam(wind::ATTACK_PARAM, -10.f, 10.f, 10.f, "");
+		configParam(wind::DECAY_PARAM, -10.f, 10.f, -1.f, "");
 
 		for(auto i=0;i<BLOCK;i++) buffer[i]=0;
 
@@ -140,29 +129,29 @@ struct WindyWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
 		INFO("BOOST");
-		addParam(createParamCentered<OnOffSwitch2V>(mm2px(Vec(50.271, 109.687	)), module, Windy::BOOST_PARAM));
+		addParam(createParamCentered<OnOffSwitch2V>(mm2px(Vec(50.271, 109.687	)), module, wind::BOOST_PARAM));
 		INFO("RINGER");
-		addParam(createParam<FourSwitch>(mm2px(Vec(34.316, 61.302)), module, Windy::RINGING_PARAM));
+		addParam(createParam<FourSwitch>(mm2px(Vec(34.316, 61.302)), module, wind::RINGING_PARAM));
 		INFO("UPPER");
-		addParam(createParam<SlidePotV>(mm2px(Vec(8.504, 18.143)), module, Windy::UPPER_PARAM));
+		addParam(createParam<SlidePotV>(mm2px(Vec(8.504, 18.143)), module, wind::UPPER_PARAM));
 		INFO("LOWER");
-		addParam(createParam<SlidePotV>(mm2px(Vec(26.304, 18.224)), module, Windy::LOWER_PARAM));
+		addParam(createParam<SlidePotV>(mm2px(Vec(26.304, 18.224)), module, wind::LOWER_PARAM));
 		INFO("CHANGE");
 
 
-		auto wbutton=(Button *)createParamCentered<Button>(mm2px(Vec(8.429, 66.269)), module, Windy::CHANGEWAVEFORM_PARAM);
+		auto wbutton=(Button *)createParamCentered<Button>(mm2px(Vec(8.429, 66.269)), module, wind::WAVEFORM_PARAM);
 		wbutton->callback=module;
 		addParam(wbutton);
 
 
 		INFO("Normal");
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(9.317, 86.12)), module, Windy::PNORMAL_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(9.317, 86.12)), module, wind::PNORMAL_PARAM));
 		INFO("RING");
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(29.426, 86.12)), module, Windy::PRING_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(29.426, 86.12)), module, wind::PRING_PARAM));
 		INFO("ATTACK");
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(11.785, 109.687)), module, Windy::ATTACK_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(11.785, 109.687)), module, wind::ATTACK_PARAM));
 		INFO("DECAY");
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(28.39, 109.687)), module, Windy::DECAY_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(28.39, 109.687)), module, wind::DECAY_PARAM));
 		INFO("OUT");
 		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(45.705, 39.364)), module, Windy::OUTPUT_OUTPUT));
 

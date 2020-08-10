@@ -19,15 +19,15 @@ namespace wind {
 
 ParameterSet::ParameterSet(rack::Module *au,const double rate,const WaveForm &waveform) :
 		mode(waveform), sampleRate(rate), volume(OUTPUT_VOLTAGE) {
-    auto lo = au->params[kLOWER_PARAM].getValue()*sampleRate/2.0;
-    auto hi = au->params[kUPPER_PARAM].getValue()*sampleRate/2.0;
+    auto lo = au->params[LOWER_PARAM].getValue()*sampleRate/2.0;
+    auto hi = au->params[UPPER_PARAM].getValue()*sampleRate/2.0;
     range = util::Range(lo,hi);
     
-    ringMode = (unsigned)au->params[kRINGING_PARAM].getValue();
+    ringMode = (unsigned)au->params[RINGING_PARAM].getValue();
     auto edge = ringMode==1 || ringMode==3;
     auto body = ringMode==2 || ringMode==3;
-    auto pNormal = au->params[kPNORMAL_PARAM].getValue();
-    auto pRing   = au->params[kPRING_PARAM].getValue();
+    auto pNormal = au->params[PNORMAL_PARAM].getValue();
+    auto pRing   = au->params[PRING_PARAM].getValue();
 
 
     
@@ -38,9 +38,9 @@ ParameterSet::ParameterSet(rack::Module *au,const double rate,const WaveForm &wa
     pBody=(body) ? pRing : pNormal;
     N = NOSCILLATORS; //(unsigned)au->Globals()->GetParameter(kParameterNID);
     
-    envActive=au->params[kBOOST_PARAM].getValue() != 0;
-    envAttack=au->params[kATTACK_PARAM].getValue();
-    envDecay=au->params[kDECAY_PARAM].getValue();
+    envActive=au->params[BOOST_PARAM].getValue() != 0;
+    envAttack=au->params[ATTACK_PARAM].getValue();
+    envDecay=au->params[DECAY_PARAM].getValue();
     env = util::EnvelopeState(envAttack,envDecay,envActive);
     
 };
