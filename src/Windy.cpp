@@ -1,8 +1,8 @@
 #include "plugin.hpp"
-#include "customWidgets.hpp"
 #include "MultiNoiseGenerator.hpp"
 #include <vector>
 #include <initializer_list>
+#include "widgets/customWidgets.hpp"
 
 #define BLOCK 64
 
@@ -54,28 +54,32 @@ struct Windy : Module {
 		configParam(wind::ATTACK_PARAM, -10.f, 10.f, 10.f, "");
 		configParam(wind::DECAY_PARAM, -10.f, 10.f, -1.f, "");
 
+		configParam(wind::WAVE_MULTI, 0.f, 3.f, 3.f, "");
+		configParam(wind::RING_MULTI, 0.f, 3.f, 3.f, "");
+		configParam(wind::BOOST_MULTI, 0.f, 1.f, 0.f, "");
+
 		for(auto i=0;i<BLOCK;i++) buffer[i]=0;
-		waveSwitch=new MultiSwitch<4>(this,SINELED_LIGHT);
-		ringSwitch=new MultiSwitch<4>(this,NEVERRING_LIGHT);
-		envelopeSwitch=new OnOffSwitch(this,ENVELOPELED_LIGHT);
+		waveSwitch=new MultiSwitch<4>(this,SINELED_LIGHT,wind::WAVE_MULTI);
+		ringSwitch=new MultiSwitch<4>(this,NEVERRING_LIGHT,wind::RING_MULTI);
+		envelopeSwitch=new OnOffSwitch(this,ENVELOPELED_LIGHT,wind::BOOST_MULTI);
 	}
 
 	void process(const ProcessArgs& args) override {
 
 			if(offset==BLOCK) {
-				auto w = static_cast<wind::WaveForm>(waveSwitch->value);
+				auto w = static_cast<wind::WaveForm>(waveSwitch->value());
 				oldParameters=parameters;
-				parameters=wind::ParameterSet(this,args.sampleRate,w,ringSwitch->value,envelopeSwitch->value);
+				parameters=wind::ParameterSet(this,args.sampleRate,w,ringSwitch->value(),envelopeSwitch->value());
 				generator.Render(buffer,BLOCK,parameters);
 				offset=0;
 				parameters.dump(oldParameters);
-				/*
-				if(parameters.changeProbability(oldParameters)) {
+
+				if(parameters.changeRange(oldParameters)) {
 					std::stringstream s;
-					s << "Edge " << parameters.pEdge << " Body " << parameters.pBody;
+					s << parameters.range;
 					led->setText(s.str());
 				}
-				*/
+
 			}
 			float output=clamp(buffer[offset++],-5.0f,5.0f);
 			outputs[OUTPUT_OUTPUT].setVoltage(output);
@@ -104,9 +108,9 @@ struct WindyWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
 		INFO("UPPER");
-		addParam(createParam<SlidePotV>(mm2px(Vec(6.388, 18.143)), module, wind::UPPER_PARAM));
+		addParam(createParam<BefacoSlidePot>(mm2px(Vec(6.388, 18.143)), module, wind::UPPER_PARAM));
 		INFO("LOWER");
-		addParam(createParam<SlidePotV>(mm2px(Vec(23.129, 18.224)), module, wind::LOWER_PARAM));
+		addParam(createParam<BefacoSlidePot>(mm2px(Vec(23.129, 18.224)), module, wind::LOWER_PARAM));
 		INFO("CHANGE");
 
 
@@ -128,26 +132,25 @@ struct WindyWidget : ModuleWidget {
 		if(module!=nullptr) bbutton->callback=module->envelopeSwitch;
 		addParam(bbutton);
 
-		/*
+
 		auto led=createWidget<LedDisplayTextField>(mm2px(Vec(10,10)));
 		led->box.size=mm2px(Vec(74.480, 6));
 		led->multiline=false;
-		led->color = SCHEME_YELLOW;
+		led->color = SCHEME_WHITE;
 		led->font = APP->window->loadFont(asset::system("res/fonts/DejaVuSans.ttf"));
 		led->textOffset=mm2px(Vec(0.5,0));
 
 		if(module!=nullptr) module->led=led;
 		addChild(led);
-	*/
 
 		INFO("Normal");
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(21.531, 101.352)), module, wind::PNORMAL_PARAM));
+		addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(21.531, 101.352)), module, wind::PNORMAL_PARAM));
 		INFO("RING");
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(36.867, 101.664)), module, wind::PRING_PARAM));
+		addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(36.867, 101.664)), module, wind::PRING_PARAM));
 		INFO("ATTACK");
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(20.101, 86.063)), module, wind::ATTACK_PARAM));
+		addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(20.101, 86.063)), module, wind::ATTACK_PARAM));
 		INFO("DECAY");
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(36.706, 86.063)), module, wind::DECAY_PARAM));
+		addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(36.706, 86.063)), module, wind::DECAY_PARAM));
 		INFO("OUT");
 		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(47.027, 33.884)), module, Windy::OUTPUT_OUTPUT));
 

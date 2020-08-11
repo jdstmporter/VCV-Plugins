@@ -12,10 +12,11 @@
 #include <random>
 #include <chrono>
 
+
 namespace wind {
     namespace util {
         
-        
+
         struct Range {
         public:
             double lo;
@@ -88,6 +89,7 @@ namespace wind {
 bool operator==(const wind::util::Range &,const wind::util::Range &);
 bool operator!=(const wind::util::Range &,const wind::util::Range &);
 
+std::ostream & operator<<(std::ostream &,const wind::util::Range &);
 
 
 #endif /* Randomiser_hpp */

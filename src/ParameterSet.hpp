@@ -32,6 +32,9 @@ enum ParameterIds {
 		PRING_PARAM,
 		ATTACK_PARAM,
 		DECAY_PARAM,
+		WAVE_MULTI,
+		RING_MULTI,
+		BOOST_MULTI,
 		NUM_PARAMS
 	};
     
@@ -57,18 +60,19 @@ protected:
         double pBody;
         unsigned N;
         util::EnvelopeState env;
-        double sampleRate;
-        double volume;
+        float sampleRate;
+        float volume;
         
 
         ParameterSet() : envActive(false), envAttack(0),envDecay(0), ringMode(0),
         		range(0,44100), mode(WaveForm::SINE), pEdge(2.0e-3), pBody(1.0e-5), N(100), env(),
         		sampleRate(44100), volume(5)  {};
-        ParameterSet(rack::Module *au,const double rate,const WaveForm &,const unsigned, const bool);
+        ParameterSet(rack::Module *au,const float rate,const WaveForm &,const unsigned, const bool);
         virtual ~ParameterSet() = default;
         
         void dump(const ParameterSet &) const;
         bool changeProbability(const ParameterSet &old) const;
+        bool changeRange(const ParameterSet &old) const;
     };
 }
 

@@ -17,7 +17,7 @@ namespace wind {
 
 
 
-ParameterSet::ParameterSet(rack::Module *au,const double rate,
+ParameterSet::ParameterSet(rack::Module *au,const float rate,
 		const WaveForm &waveform,const unsigned ring,const bool e) :
 		envActive(e), ringMode(ring), mode(waveform), sampleRate(rate), volume(OUTPUT_VOLTAGE) {
     auto lo = au->params[LOWER_PARAM].getValue()*sampleRate/2.0;
@@ -26,8 +26,8 @@ ParameterSet::ParameterSet(rack::Module *au,const double rate,
     
     auto edge = ringMode==1 || ringMode==3;
     auto body = ringMode==2 || ringMode==3;
-    auto pNormal = au->params[PNORMAL_PARAM].getValue();
-    auto pRing   = au->params[PRING_PARAM].getValue();
+    auto pNormal = pow(2,au->params[PNORMAL_PARAM].getValue())-1.f; // logarithmic
+    auto pRing   = pow(2,au->params[PRING_PARAM].getValue())-1.f; // logarithmic
 
 
     
@@ -46,6 +46,9 @@ ParameterSet::ParameterSet(rack::Module *au,const double rate,
 
 bool ParameterSet::changeProbability(const ParameterSet &old) const {
 	return pEdge != old.pEdge || pBody != old.pBody;
+}
+bool ParameterSet::changeRange(const ParameterSet &old) const {
+	return range != old.range;
 }
 
 void ParameterSet::dump(const ParameterSet &old) const {

@@ -7,6 +7,8 @@
 //
 
 #include "Randomiser.hpp"
+#include <iomanip>
+#include <sstream>
 
 namespace wind { namespace util {
 
@@ -32,9 +34,19 @@ void RandomInteger::rebase(unsigned max) {
 };
 }}
 
-bool operator==(const wind::util::Range &l,const wind::util::Range &r) {
-	return l.lo==r.lo && l.hi==r.hi;
-}
-bool operator!=(const wind::util::Range &l,const wind::util::Range &r) {
-	return l.lo!=r.lo || l.hi!=r.hi;
+bool operator==(const wind::util::Range &l,const wind::util::Range &r) { return l.lo==r.lo && l.hi==r.hi; }
+bool operator!=(const wind::util::Range &l,const wind::util::Range &r)  { return l.lo!=r.lo || l.hi!=r.hi; }
+
+std::ostream & operator<<(std::ostream &o,const wind::util::Range &r) {
+	std::stringstream s;
+
+	auto l=r.lo;
+	if(l<1000.f) { s << (int)l << " Hz"; }
+	else { s << std::fixed << std::setprecision(3) << (l/1000.f) << " kHz"; }
+	s << " to ";
+	auto h=r.hi;
+	if(h<1000.f) { s << (int)h << " Hz"; }
+	else { s << std::fixed << std::setprecision(3) << (h/1000.f) << " kHz"; }
+	o << s.str();
+	return o;
 }

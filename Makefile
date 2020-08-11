@@ -10,7 +10,7 @@ CXXFLAGS += -std=c++17
 # Static libraries are fine, but they should be added to this plugin's build system.
 LDFLAGS +=
 
-SRC := $(wildcard src/*.cpp)
+SRC := $(wildcard src/*.cpp) $(wildcard src/widgets/*.cpp)
 
 # Add .cpp files to the build
 SOURCES += $(SRC)
