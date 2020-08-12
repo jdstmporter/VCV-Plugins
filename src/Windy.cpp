@@ -5,7 +5,39 @@
 #include "widgets/customWidgets.hpp"
 
 #define BLOCK 64
+struct RateSet {
+	int N;
+	std::vector<TextDisplayField *> labels;
 
+	RateSet(const Rect &box,const int n=0) : N(n), labels() {
+		float frac = box.size.y /(N+1);
+		auto left=box.pos.x;
+		auto bottom=box.getBottom();
+		//auto size = Vec(box.size.x,frac);
+		for(auto i=0;i<=N;i++) {
+			auto origin=Vec(left,bottom-(i+1)*frac);
+			auto label = createWidget<TextDisplayField>(origin);
+			label->setFG(0,0,0,1);
+			label->loadFont(asset::system("res/fonts/DejaVuSans.ttf"));
+			label->setFontSize(6);
+			label->setText("-");
+			labels.push_back(label);
+		}
+	}
+	virtual ~RateSet() = default;
+
+	void add(ModuleWidget *ui) {
+		for(auto it=labels.begin();it!=labels.end();it++) {
+			ui->addChild(*it);
+		}
+	}
+	void setRate(const float rate) {
+		float fn=rate/N;
+		for(auto i=0;i<=N;i++) labels[i]->setText(asHz(i*fn));
+	}
+
+
+};
 
 struct Windy : Module {
 
@@ -40,9 +72,10 @@ struct Windy : Module {
 	MultiSwitch<4> *waveSwitch;
 	MultiSwitch<4> *ringSwitch;
 	OnOffSwitch *envelopeSwitch;
-	LedDisplayTextField *led;
+	RateSet *r;
+	bool labelled;
 
-	Windy() : offset(0), parameters(), oldParameters(), generator(), wave(NUM_LIGHTS-1), led(nullptr)  {
+	Windy() : offset(0), parameters(), oldParameters(), generator(), wave(NUM_LIGHTS-1), r(nullptr), labelled(false)  {
 		config(wind::NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 		configParam(wind::BOOST_PARAM, 0.f, 1.f, 0.f, "");
 		configParam(wind::LOWER_PARAM, 0.f, 1.f, 0.f, "");
@@ -69,6 +102,11 @@ struct Windy : Module {
 			if(offset==BLOCK) {
 				auto w = static_cast<wind::WaveForm>(waveSwitch->value());
 				oldParameters=parameters;
+				if(!labelled && r !=  nullptr) {
+					INFO("Labelling for %f",args.sampleRate);
+					r->setRate(args.sampleRate);
+					labelled=true;
+				}
 				parameters=wind::ParameterSet(this,args.sampleRate,w,ringSwitch->value(),envelopeSwitch->value());
 				generator.Render(buffer,BLOCK,parameters);
 				offset=0;
@@ -77,7 +115,8 @@ struct Windy : Module {
 				if(parameters.changeRange(oldParameters)) {
 					std::stringstream s;
 					s << parameters.range;
-					led->setText(s.str());
+
+
 				}
 
 			}
@@ -108,9 +147,11 @@ struct WindyWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
 		INFO("UPPER");
-		addParam(createParam<BefacoSlidePot>(mm2px(Vec(6.388, 18.143)), module, wind::UPPER_PARAM));
+		auto upper=createParam<SlidePotV>(mm2px(Vec(6.388, 18.143)), module, wind::UPPER_PARAM);
+		addParam(upper);
 		INFO("LOWER");
-		addParam(createParam<BefacoSlidePot>(mm2px(Vec(23.129, 18.224)), module, wind::LOWER_PARAM));
+		auto lower=createParam<SlidePotV>(mm2px(Vec(23.129, 18.224)), module, wind::LOWER_PARAM);
+		addParam(lower);
 		INFO("CHANGE");
 
 
@@ -133,6 +174,9 @@ struct WindyWidget : ModuleWidget {
 		addParam(bbutton);
 
 
+
+
+/*
 		auto led=createWidget<LedDisplayTextField>(mm2px(Vec(10,10)));
 		led->box.size=mm2px(Vec(74.480, 6));
 		led->multiline=false;
@@ -142,6 +186,20 @@ struct WindyWidget : ModuleWidget {
 
 		if(module!=nullptr) module->led=led;
 		addChild(led);
+*/
+		INFO("Making gap");
+		auto origin = upper->box.getTopRight();
+		auto height = upper->box.size.y;
+		auto width = lower->box.pos.x - origin.x;
+
+		auto rect = Rect(origin,Vec(width,height));
+		INFO("Made sizes %f %f %f %f",rect.pos.x,rect.pos.y,rect.size.x,rect.size.y);
+		auto r = new RateSet(rect,4);
+		INFO("Made label set");
+		r->add(this);
+		INFO("Added to UI");
+		if(module!=nullptr) module->r=r;
+		INFO("Connected to module");
 
 		INFO("Normal");
 		addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(21.531, 101.352)), module, wind::PNORMAL_PARAM));
@@ -167,7 +225,10 @@ struct WindyWidget : ModuleWidget {
 
 		addChild(createLightCentered<SmallLight<YellowLight>>(mm2px(Vec(7.321, 83.249)), module, Windy::ENVELOPELED_LIGHT));
 		INFO("BUILT");
+
 	}
+
+
 };
 
 

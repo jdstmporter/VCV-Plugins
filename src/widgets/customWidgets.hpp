@@ -10,6 +10,6 @@
 
 #include "simpleWidgets.hpp"
 #include "multiSwitch.hpp"
-
+#include "text.hpp"
 
 #endif /* SRC_WIDGETS_CUSTOMWIDGETS_HPP_ */

@@ -1,4 +1,4 @@
-#include "plugin.hpp"
+#include "../plugin.hpp"
 #include "hilbertXform.hpp"
 
 #define BLOCKSIZE 64
