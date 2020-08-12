@@ -31,22 +31,23 @@ struct SlidePot : app::SvgSlider {
 public:
 	SlidePot() : app::SvgSlider() {
 		switch(O) {
-		case Orientation::Vertical:
+		case Orientation::Vertical: {
 			auto margin = math::Vec(3.5, 3.5);
-			maxHandlePos = math::Vec(-1, -2).plus(margin);
-			minHandlePos = math::Vec(-1, 87).plus(margin);
-			setBackgroundSvg(APP->window->loadSvg(asset::plugin(pluginInstance,"res/BefacoSlidePot.svg")));
-			setHandleSvg(APP->window->loadSvg(asset::plugin(pluginInstance,"res/BefacoSlidePotHandle.svg")));
+			auto w2 = (19.27f-8.5913172f)/2.f;
+			maxHandlePos = math::Vec(-w2, -2).plus(margin);
+			minHandlePos = math::Vec(-w2, 87).plus(margin);
+			setBackgroundSvg(APP->window->loadSvg(asset::plugin(pluginInstance,"res/SlidePotV.svg")));
+			setHandleSvg(APP->window->loadSvg(asset::plugin(pluginInstance,"res/SlidePotVHandle.svg")));
 			background->box.pos = margin;
 			box.size = background->box.size.plus(margin.mult(2));
-			break;
-		case Orientation::Horizontal:
+			break; }
+		case Orientation::Horizontal: {
 			auto margin = math::Vec(0,0);
 			maxHandlePos = app::mm2px(math::Vec(16.578, 0.738).plus(margin));
 			minHandlePos = app::mm2px(math::Vec(0.738, 0.738).plus(margin));
 			setBackgroundSvg(APP->window->loadSvg(asset::plugin(pluginInstance,"res/SlidePotH.svg")));
 			setHandleSvg(APP->window->loadSvg(asset::plugin(pluginInstance,"res/SlidePotHandleH.svg")));
-			break;
+			break; }
 		}
 
 	}

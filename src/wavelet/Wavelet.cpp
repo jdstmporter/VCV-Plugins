@@ -1,4 +1,4 @@
-#include "plugin.hpp"
+#include "../plugin.hpp"
 #include "Haar.hpp"
 
 #define NLAYERS 4
