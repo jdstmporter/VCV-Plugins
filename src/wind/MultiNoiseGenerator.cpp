@@ -23,7 +23,7 @@ sources(N), generator(), chooser(), envState(), env() {
     std::generate_n(sources.begin(), N, [this]() {
         double freq=generator.get(sampleRate);
         double phase=generator.get(PointSource::TwoPi);
-        std::cerr << sampleRate << " " << freq << " " << phase << std::endl;
+        //std::cerr << sampleRate << " " << freq << " " << phase << std::endl;
         return std::make_shared<PointSource>(sampleRate,freq,phase,env.it());
     });
 };
