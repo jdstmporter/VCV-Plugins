@@ -10,7 +10,8 @@ CXXFLAGS += -std=c++17
 # Static libraries are fine, but they should be added to this plugin's build system.
 LDFLAGS +=
 
-SRC := $(wildcard src/*.cpp) $(wildcard src/widgets/*.cpp) $(wildcard src/hilbert/*.cpp) $(wildcard src/wavelet/*.cpp)
+SRC_DIRS := src src/widgets src/hilbert src/wavelet src/wind
+SRC := $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.cpp))
 
 # Add .cpp files to the build
 SOURCES += $(SRC)
@@ -24,5 +25,5 @@ DISTRIBUTABLES += $(wildcard LICENSE*)
 include $(RACK_DIR)/plugin.mk
 
 list:
-	$(info Source list is $(SOURCES) )
+	$(info Source list is $(SRC) )
 
