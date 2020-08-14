@@ -149,15 +149,15 @@ struct WindyWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
 		INFO("UPPER");
-		auto upper=createParam<SlidePotV>(mm2px(Vec(9.061, 12.933)), module, wind::UPPER_PARAM);
+		auto upper=createParam<SlidePotV>(mm2px(Vec(9.061, 12.851)), module, wind::UPPER_PARAM);
 		addParam(upper);
 		INFO("LOWER");
-		auto lower=createParam<SlidePotV>(mm2px(Vec(45.899, 12.933)), module, wind::LOWER_PARAM);
+		auto lower=createParam<SlidePotV>(mm2px(Vec(45.899, 12.851)), module, wind::LOWER_PARAM);
 		addParam(lower);
 		INFO("CHANGE");
 
 
-		auto wbutton=(Button *)createParamCentered<Button>(mm2px(Vec(8.429, 60.17)), module, wind::WAVEFORM_PARAM);
+		auto wbutton=(Button *)createParamCentered<Button>(mm2px(Vec(6.312, 60.17)), module, wind::WAVEFORM_PARAM);
 		INFO("Creted wbutton");
 		if(module!=nullptr) wbutton->callback=module->waveSwitch;
 		INFO("Set wbutton callback");
@@ -166,12 +166,12 @@ struct WindyWidget : ModuleWidget {
 		addParam(wbutton);
 
 		INFO("RINGER");
-		auto rbutton=(Button *)createParamCentered<Button>(mm2px(Vec(35.806, 59.956)), module, wind::RINGING_PARAM);
+		auto rbutton=(Button *)createParamCentered<Button>(mm2px(Vec(36.335, 59.956)), module, wind::RINGING_PARAM);
 		if(module!=nullptr) rbutton->callback=module->ringSwitch;
 		addParam(rbutton);
 
 		INFO("BOOST");
-		auto bbutton=(Button *)createParamCentered<Button>(mm2px(Vec(8.429, 86.774)), module, wind::BOOST_PARAM);
+		auto bbutton=(Button *)createParamCentered<Button>(mm2px(Vec(24.682, 87.908)), module, wind::BOOST_PARAM);
 		if(module!=nullptr) bbutton->callback=module->envelopeSwitch;
 		addParam(bbutton);
 
@@ -204,28 +204,28 @@ struct WindyWidget : ModuleWidget {
 		INFO("Connected to module");
 
 		INFO("Normal");
-		addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(46.855, 77.067)), module, wind::PNORMAL_PARAM));
+		addParam(createParamCentered<BefacoTinyKnob>(mm2px(Vec(48.707, 77.105)), module, wind::PNORMAL_PARAM));
 		INFO("RING");
-		addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(46.855, 92.971)), module, wind::PRING_PARAM));
+		addParam(createParamCentered<BefacoTinyKnob>(mm2px(Vec(48.556, 92.035)), module, wind::PRING_PARAM));
 		INFO("ATTACK");
-		addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(21.423, 77.29)), module, wind::ATTACK_PARAM));
+		addParam(createParamCentered<BefacoTinyKnob>(mm2px(Vec(11.407, 76.727)), module, wind::ATTACK_PARAM));
 		INFO("DECAY");
-		addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(21.423, 93.169)), module, wind::DECAY_PARAM));
+		addParam(createParamCentered<BefacoTinyKnob>(mm2px(Vec(11.407, 92.602)), module, wind::DECAY_PARAM));
 		INFO("OUT");
 		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(30.48, 114.771)), module, Windy::OUTPUT_OUTPUT));
 
 		INFO("LEDs");
-		addChild(createLightCentered<SmallLight<YellowLight>>(mm2px(Vec(16.914, 53.389)), module, Windy::SINELED_LIGHT));
-		addChild(createLightCentered<SmallLight<YellowLight>>(mm2px(Vec(16.914, 57.742)), module, Windy::SQUARELED_LIGHT));
-		addChild(createLightCentered<SmallLight<YellowLight>>(mm2px(Vec(16.914, 62.095)), module, Windy::TRIANGLELED_LIGHT));
-		addChild(createLightCentered<SmallLight<YellowLight>>(mm2px(Vec(16.914, 66.448)), module, Windy::SAWTOOTHLED_LIGHT));
+		addChild(createLightCentered<SmallLight<YellowLight>>(mm2px(Vec(14.798, 53.389)), module, Windy::SINELED_LIGHT));
+		addChild(createLightCentered<SmallLight<YellowLight>>(mm2px(Vec(14.798, 57.742)), module, Windy::SQUARELED_LIGHT));
+		addChild(createLightCentered<SmallLight<YellowLight>>(mm2px(Vec(14.798, 62.095)), module, Windy::TRIANGLELED_LIGHT));
+		addChild(createLightCentered<SmallLight<YellowLight>>(mm2px(Vec(14.798, 66.448)), module, Windy::SAWTOOTHLED_LIGHT));
 
-		addChild(createLightCentered<SmallLight<RedLight>>(mm2px(Vec(44.292, 53.427)), module, Windy::NEVERRING_LIGHT));
-		addChild(createLightCentered<SmallLight<YellowLight>>(mm2px(Vec(44.292, 57.78)), module, Windy::ONCHANGERING_LIGHT));
-		addChild(createLightCentered<SmallLight<YellowLight>>(mm2px(Vec(44.292, 62.133)), module, Windy::INTERNALRING_LIGHT));
-		addChild(createLightCentered<SmallLight<GreenLight>>(mm2px(Vec(44.292, 66.486)), module, Windy::ALWAYSRING_LIGHT));
+		addChild(createLightCentered<SmallLight<RedLight>>(mm2px(Vec(44.821, 53.427)), module, Windy::NEVERRING_LIGHT));
+		addChild(createLightCentered<SmallLight<YellowLight>>(mm2px(Vec(44.821, 57.78)), module, Windy::ONCHANGERING_LIGHT));
+		addChild(createLightCentered<SmallLight<YellowLight>>(mm2px(Vec(44.821, 62.133)), module, Windy::INTERNALRING_LIGHT));
+		addChild(createLightCentered<SmallLight<GreenLight>>(mm2px(Vec(44.821, 66.486)), module, Windy::ALWAYSRING_LIGHT));
 
-		addChild(createLightCentered<SmallLight<YellowLight>>(mm2px(Vec(8.429, 80.445)), module, Windy::ENVELOPELED_LIGHT));
+		addChild(createLightCentered<SmallLight<YellowLight>>(mm2px(Vec(24.682, 82.638)), module, Windy::ENVELOPELED_LIGHT));
 		INFO("BUILT");
 
 	}
