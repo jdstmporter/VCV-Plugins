@@ -37,10 +37,10 @@ void RandomInteger::rebase(unsigned max) {
 bool operator==(const wind::util::Range &l,const wind::util::Range &r) { return l.lo==r.lo && l.hi==r.hi; }
 bool operator!=(const wind::util::Range &l,const wind::util::Range &r)  { return l.lo!=r.lo || l.hi!=r.hi; }
 
-std::string asHz(const float f) {
+std::string asHz(const float f,const unsigned n) {
 	std::stringstream s;
 	if(f<1000.f) { s << (int)f << " Hz"; }
-	else { s << std::fixed << std::setprecision(3) << (f/1000.f) << " kHz"; }
+	else { s << std::fixed << std::setprecision(n) << (f/1000.f) << " kHz"; }
 	return s.str();
 }
 

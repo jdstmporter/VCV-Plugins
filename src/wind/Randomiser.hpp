@@ -90,6 +90,6 @@ bool operator==(const wind::util::Range &,const wind::util::Range &);
 bool operator!=(const wind::util::Range &,const wind::util::Range &);
 
 std::ostream & operator<<(std::ostream &,const wind::util::Range &);
-std::string asHz(const float f);
+std::string asHz(const float f,const unsigned n=3);
 
 #endif /* Randomiser_hpp */
