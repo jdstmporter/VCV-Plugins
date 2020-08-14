@@ -20,6 +20,7 @@ struct TextDisplayField : public LedDisplayTextField {
 	NVGcolor background;
 	NVGcolor highlight;
 	float fontSize = NAN;
+	bool centre = false;
 
 	TextDisplayField() : LedDisplayTextField() {
 		background = nvgRGBAf(0,0,0,0);
@@ -59,8 +60,17 @@ struct TextDisplayField : public LedDisplayTextField {
 
 				int begin = std::min(cursor, selection);
 				int end = (this == APP->event->selectedWidget) ? std::max(cursor, selection) : -1;
-				bndIconLabelCaret(ctx, textOffset.x, textOffset.y,
-				                  box.size.x - 2 * textOffset.x, box.size.y - 2 * textOffset.y,
+
+				auto boxWidth = box.size.x - 2 * textOffset.x;
+				float bounds[4] = {0,0,0,0};
+				nvgTextBounds(ctx,textOffset.x, textOffset.y,text.c_str(),NULL,bounds);
+				auto textWidth=bounds[2]-bounds[0];
+				auto offset=(centre) ? 0.5f*(boxWidth-textWidth) : 0.0;
+				//INFO("%f,%f,%f,%f  %f",bounds[0],bounds[1],bounds[2],bounds[3],offset);
+
+
+				bndIconLabelCaret(ctx, textOffset.x + offset, textOffset.y,
+				                  boxWidth, box.size.y - 2 * textOffset.y,
 				                  -1, (NVGcolor)color, 12, text.c_str(), highlight, begin, end);
 
 				bndSetFont(APP->window->uiFont->handle);

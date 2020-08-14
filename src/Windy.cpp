@@ -13,11 +13,13 @@ struct RateSet {
 		float frac = box.size.y /(N+1);
 		auto left=box.pos.x;
 		auto bottom=box.getBottom();
-		//auto size = Vec(box.size.x,frac);
+		auto size = Vec(box.size.x,frac);
 		for(auto i=0;i<=N;i++) {
 			auto origin=Vec(left,bottom-(i+1)*frac);
 			auto label = createWidget<TextDisplayField>(origin);
+			label->box=Rect(origin,size);
 			label->setFG(0,0,0,1);
+			label->centre=true;
 			label->loadFont(asset::system("res/fonts/DejaVuSans.ttf"));
 			label->setFontSize(6);
 			label->setText("-");
@@ -32,8 +34,8 @@ struct RateSet {
 		}
 	}
 	void setRate(const float rate) {
-		float fn=rate/N;
-		for(auto i=0;i<=N;i++) labels[i]->setText(asHz(i*fn));
+		float fn=rate/(2.f*N);
+		for(auto i=0;i<=N;i++) labels[i]->setText(asHz(i*fn,2));
 	}
 
 
