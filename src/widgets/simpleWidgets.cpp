@@ -6,12 +6,10 @@
  */
 
 
-#include "plugin.hpp"
-#include "customWidgets.hpp"
+#include "../plugin.hpp"
+#include "simpleWidgets.hpp"
 
 namespace rack { namespace componentlibrary {
-
-
 
 FourSwitch::FourSwitch()  {
 		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance,"res/CKSSFour_0.svg")));

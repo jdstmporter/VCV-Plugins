@@ -19,11 +19,11 @@ namespace wind {
 
 MultiNoiseGenerator::MultiNoiseGenerator(const double sampleRate_,const unsigned nSources)  : sampleRate(sampleRate_), N(nSources),
 sources(N), generator(), chooser(), envState(), env() {
-    generator.rebase(1.0);
+    generator.rebase(1.f);
     std::generate_n(sources.begin(), N, [this]() {
         double freq=generator.get(sampleRate);
         double phase=generator.get(PointSource::TwoPi);
-        std::cerr << sampleRate << " " << freq << " " << phase << std::endl;
+        //std::cerr << sampleRate << " " << freq << " " << phase << std::endl;
         return std::make_shared<PointSource>(sampleRate,freq,phase,env.it());
     });
 };
