@@ -11,3 +11,4 @@ extern Plugin* pluginInstance;
 extern Model *modelWavelet;
 extern Model *modelHilbert;
 extern Model *modelWindy;
+extern Model *modelKicker;

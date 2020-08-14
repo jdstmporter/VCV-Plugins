@@ -36,6 +36,12 @@
       "name": "Windy",
       "description": "Wind Machine Instrument",
       "tags": []
+    },
+    {
+      "slug": "Kicker",
+      "name": "Kicker",
+      "description": "",
+      "tags": []
     }
   ]
 }

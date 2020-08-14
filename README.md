@@ -24,6 +24,28 @@ This is incredibly useful, as it opens up the possibility of using complex-value
   - Phase: the unwrapped phase angle of the *complex* signal, corresponding
     to the phase of the input signal
 
+## Kicker
+
+A very simple envelope follower, designed to give an approximation to the true amplitude of the input signal, or a gate signal to indicate when the amplitude crosses a certain threshold.
+
+### Theory
+The incoming signal is first rectified (i.e. made always positive), using one of three algorithms:
+
+- *Half-wave*: threshold the signal at 0, ignoring negative values;
+- *Full-wave*: compute the absolute magnitude of the signal, so negative values are inverted to become positive;
+- *Square*: compute the square of the signal (which is always positive)
+
+The resulting rectified signal is then smoothed using a simple one-pole IIR filter.
+
+### This module 
+
+- *Input*: the input signal
+- *Rectification*: choose which of the three rectification algorithms to use
+- *Learning rate*: the parameter of the smoothing filter; 0 ignores incoming values (infinite smoothing), 1 does no smoothing
+- *Output*: the output signal, an approximate envelope of the signal
+
+This functionality can be provided much more precisely by a Hilbert transformer (see above).  However, its simplicity means that it operates always in real time, without the lag characteristic of complex DSP algorithms.  Moreover, in many applications, e.g. determining gate signals, high precision is not required (while timeliness is). 
+
 ## Wavelet Shaper
 
 This module uses a very basic wavelet transform to distort a signal in unusual and unexpected ways.
